@@ -215,6 +215,10 @@ begin
     if old.status <> 'draft' then raise exception 'Posted or reversed journal entries cannot be deleted'; end if;
     return old;
   end if;
+  if old.status = 'posted' and new.status = 'reversed'
+     and (to_jsonb(new) - 'status' - 'updated_at') = (to_jsonb(old) - 'status' - 'updated_at') then
+    return new;
+  end if;
   if old.status in ('posted','reversed') then
     raise exception 'Posted or reversed journal entries are immutable; create a reversal instead';
   end if;
