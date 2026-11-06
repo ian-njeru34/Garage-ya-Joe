@@ -2,8 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 export default function CustomerSignInPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -20,11 +22,29 @@ export default function CustomerSignInPage() {
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       if (!url || !key) throw new Error("Sign-in is temporarily unavailable. Please contact the administrator.");
       const supabase = createClient(url, key);
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
       if (signInError) throw signInError;
+      if (!data.user) throw new Error("We could not verify your account. Please sign in again.");
+
+      const { data: roles, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role_code,business_id,location_id")
+        .eq("user_id", data.user.id);
+
+      if (roleError) {
+        await supabase.auth.signOut();
+        throw new Error("We signed you in but could not verify your account permissions. Please contact the administrator.");
+      }
+
+      if (roles?.some((role) => role.role_code === "owner")) {
+        router.replace("/owner");
+        router.refresh();
+        return;
+      }
+
       setMessage("You are signed in. Your customer dashboard is not yet available; please contact the garage for assistance.");
       setPassword("");
     } catch (err) {
