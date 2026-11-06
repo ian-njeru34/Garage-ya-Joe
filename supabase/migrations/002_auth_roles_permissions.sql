@@ -209,7 +209,8 @@ revoke all on public.role_definitions, public.permission_definitions, public.rol
 revoke all on public.user_roles from anon, authenticated;
 grant select on public.user_roles to authenticated;
 revoke all on public.profiles from anon, authenticated;
-grant select, update on public.profiles to authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name, phone) on public.profiles to authenticated;
 
 -- Trusted server-side administration provisions roles; browser clients cannot assign roles.
 grant all on public.role_definitions, public.permission_definitions, public.role_permissions, public.user_roles
