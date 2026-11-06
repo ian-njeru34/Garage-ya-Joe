@@ -392,9 +392,9 @@ returns uuid
 language sql
 security invoker
 set search_path = ''
-as $
+as $func$
   select private.post_goods_receipt_impl(p_business_id,p_goods_receipt_id);
-$;
+$func$;
 
 -- ---------------------------------------------------------------------------
 -- Recalculate document totals whenever draft line items change.
