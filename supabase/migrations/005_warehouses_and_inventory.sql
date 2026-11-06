@@ -32,6 +32,7 @@ alter table public.inventory_balances
     references public.products (business_id, id) on delete restrict;
 
 alter table public.stock_movements
+  drop constraint stock_movements_quantity_delta_check,
   add column quantity_reserved_delta numeric(18,3) not null default 0,
   add column unit_cost_kes numeric(18,4)
     check (unit_cost_kes is null or unit_cost_kes >= 0),
