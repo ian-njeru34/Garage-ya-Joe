@@ -36,6 +36,9 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get("token_hash");
+    const recoveryType = params.get("type");
     const { data: listener } = client.auth.onAuthStateChange((event, session) => {
       if (!active) return;
       if (event === "PASSWORD_RECOVERY" && session) {
@@ -44,6 +47,19 @@ export default function ResetPasswordPage() {
         setError("");
       }
     });
+
+    if (tokenHash && recoveryType === "recovery") {
+      client.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ data, error: verifyError }) => {
+        if (!active) return;
+        if (verifyError) setError(verifyError.message);
+        else setReady(Boolean(data.session));
+        setChecking(false);
+      });
+      return () => {
+        active = false;
+        listener.subscription.unsubscribe();
+      };
+    }
 
     client.auth.getSession().then(({ data, error: sessionError }) => {
       if (!active) return;
