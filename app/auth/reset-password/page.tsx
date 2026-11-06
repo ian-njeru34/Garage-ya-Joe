@@ -48,29 +48,33 @@ export default function ResetPasswordPage() {
       }
     });
 
-    if (tokenHash && recoveryType === "recovery") {
-      client.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ data, error: verifyError }) => {
-        if (!active) return;
-        if (verifyError) setError(verifyError.message);
-        else setReady(Boolean(data.session));
-        setChecking(false);
-      });
-      return () => {
-        active = false;
-        listener.subscription.unsubscribe();
-      };
-    }
-
-    client.auth.getSession().then(({ data, error: sessionError }) => {
-      if (!active) return;
-      if (sessionError) setError(sessionError.message);
-      // A recovery link creates a session before this page can update the password.
-      if (data.session) setReady(true);
-      else if (!window.location.hash.includes("access_token=") && !window.location.search.includes("code=")) {
-        setError("This password-reset link is missing or has expired. Request a new password-reset email.");
+    async function completeRecovery() {
+      try {
+        if (tokenHash && recoveryType === "recovery") {
+          const { data, error: verifyError } = await client.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "recovery",
+          });
+          if (verifyError) throw verifyError;
+          if (active) setReady(Boolean(data.session));
+        } else {
+          const code = params.get("code");
+          if (code) {
+            const { error: exchangeError } = await client.auth.exchangeCodeForSession(code);
+            if (exchangeError) throw exchangeError;
+          }
+          const { data, error: sessionError } = await client.auth.getSession();
+          if (sessionError) throw sessionError;
+          if (active && data.session) setReady(true);
+          else if (active) setError("This password-reset link is missing or has expired. Request a new password-reset email.");
+        }
+      } catch (recoveryError) {
+        if (active) setError(recoveryError instanceof Error ? recoveryError.message : "This password-reset link is invalid or has expired. Request a new one.");
+      } finally {
+        if (active) setChecking(false);
       }
-      setChecking(false);
-    });
+    }
+    void completeRecovery();
 
     return () => {
       active = false;
