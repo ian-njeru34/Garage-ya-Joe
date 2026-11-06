@@ -300,10 +300,10 @@ $$;
 -- commit or roll back together.
 -- ---------------------------------------------------------------------------
 
-create or replace function public.post_goods_receipt(p_business_id uuid,p_goods_receipt_id uuid)
+create or replace function private.post_goods_receipt_impl(p_business_id uuid,p_goods_receipt_id uuid)
 returns uuid
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -386,6 +386,15 @@ begin
   return p_goods_receipt_id;
 end;
 $$;
+
+create or replace function public.post_goods_receipt(p_business_id uuid,p_goods_receipt_id uuid)
+returns uuid
+language sql
+security invoker
+set search_path = ''
+as $
+  select private.post_goods_receipt_impl(p_business_id,p_goods_receipt_id);
+$;
 
 -- ---------------------------------------------------------------------------
 -- Recalculate document totals whenever draft line items change.
@@ -516,8 +525,9 @@ begin
   select * into v_quote from public.quotations
   where business_id=p_business_id and id=p_quotation_id for update;
   if not found then raise exception 'Quotation not found'; end if;
-  if not private.has_business_permission(p_business_id,'sales.manage',v_quote.location_id) then
-    raise exception 'Sales management permission required' using errcode='42501';
+  if not private.has_business_permission(p_business_id,'sales.manage',v_quote.location_id)
+     or not private.has_business_permission(p_business_id,'quotations.manage',v_quote.location_id) then
+    raise exception 'Sales and quotation management permissions are required' using errcode='42501';
   end if;
   if v_quote.status <> 'accepted' then raise exception 'Only accepted quotations can be converted'; end if;
   if v_quote.valid_until is not null and v_quote.valid_until < current_date then
@@ -629,6 +639,8 @@ revoke all on function private.guard_stock_movement_immutable() from public,anon
 revoke all on function private.project_stock_movement_to_balance() from public,anon,authenticated;
 revoke all on function private.apply_stock_movement_impl(uuid,uuid,uuid,text,numeric,numeric,numeric,text,uuid,text) from public,anon;
 revoke all on function private.recalculate_commercial_document_totals() from public,anon,authenticated;
+revoke all on function private.post_goods_receipt_impl(uuid,uuid) from public,anon;
+grant execute on function private.post_goods_receipt_impl(uuid,uuid) to authenticated;
 grant usage on schema private to authenticated;
 grant execute on function private.apply_stock_movement_impl(uuid,uuid,uuid,text,numeric,numeric,numeric,text,uuid,text) to authenticated;
 
