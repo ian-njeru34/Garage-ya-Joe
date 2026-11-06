@@ -108,7 +108,7 @@ do $$
 declare
   v_table text;
   v_tables text[] := array[
-    'businesses','locations','customers','vehicles','vehicle_customer_relationships',
+    'businesses','locations','user_roles','customers','vehicles','vehicle_customer_relationships',
     'products','product_categories','product_part_numbers','product_vehicle_compatibility',
     'product_images','warehouses','inventory_balances','stock_movements',
     'service_appointments','vehicle_inspections','job_cards','job_tasks','job_parts',
@@ -152,6 +152,7 @@ create table public.notifications (
   read_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  constraint notifications_business_id_id_unique unique (business_id,id),
   constraint notifications_location_fk
     foreign key (business_id,location_id)
     references public.locations(business_id,id) on delete restrict,
@@ -176,7 +177,8 @@ on public.notifications for update to authenticated
 using (recipient_user_id = (select auth.uid()))
 with check (
   recipient_user_id = (select auth.uid())
-  and status in ('queued','sent','read','cancelled','failed','processing')
+  and status = 'read'
+  and read_at is not null
 );
 
 revoke all on public.notifications from anon,authenticated;
