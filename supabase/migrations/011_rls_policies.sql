@@ -43,6 +43,17 @@ grant select on public.currencies to anon, authenticated;
 grant all on public.currencies to service_role;
 
 -- These are authorization internals. Keep them unavailable through the browser Data API.
+-- Explicit deny policies document the boundary and keep browser roles blocked even if grants change later.
+create policy "No browser access to role definitions"
+on public.role_definitions for all to anon, authenticated
+using (false) with check (false);
+create policy "No browser access to permission definitions"
+on public.permission_definitions for all to anon, authenticated
+using (false) with check (false);
+create policy "No browser access to role permissions"
+on public.role_permissions for all to anon, authenticated
+using (false) with check (false);
+
 alter table public.role_definitions enable row level security;
 alter table public.permission_definitions enable row level security;
 alter table public.role_permissions enable row level security;
@@ -52,6 +63,9 @@ grant all on public.role_definitions, public.permission_definitions, public.role
   to service_role;
 
 -- Delivery attempts can contain provider references and failure details; worker-only.
+create policy "No browser access to notification delivery attempts"
+on public.notification_delivery_attempts for all to anon, authenticated
+using (false) with check (false);
 alter table public.notification_delivery_attempts enable row level security;
 revoke all on public.notification_delivery_attempts from anon, authenticated;
 grant all on public.notification_delivery_attempts to service_role;
