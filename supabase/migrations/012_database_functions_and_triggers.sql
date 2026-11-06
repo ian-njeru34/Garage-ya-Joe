@@ -3,13 +3,11 @@
 -- Financial document totals are recalculated from their line items inside the same transaction.
 
 -- ---------------------------------------------------------------------------
--- Inventory ledger and balance projection
--- ---------------------------------------------------------------------------
-
+-- The existing inventory API in the warehouse migration already updates the
+-- balance and appends a stock movement in one transaction. Keep that API as the
+-- sole writer; this trigger prevents later edits to the ledger.
 create or replace function private.guard_stock_movement_immutable()
-returns trigger
-language plpgsql
-set search_path = ''
+returns trigger language plpgsql set search_path = ''
 as $$
 begin
   raise exception 'Stock movements are immutable. Record a correcting movement instead';
@@ -20,282 +18,6 @@ create trigger stock_movements_immutable
 before update or delete on public.stock_movements
 for each row execute function private.guard_stock_movement_immutable();
 
-create or replace function private.project_stock_movement_to_balance()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  v_on_hand numeric(18,3);
-  v_reserved numeric(18,3);
-  v_average numeric(18,4);
-  v_new_on_hand numeric(18,3);
-  v_new_reserved numeric(18,3);
-  v_new_average numeric(18,4);
-begin
-  insert into public.inventory_balances(
-    business_id,warehouse_id,product_id,quantity_on_hand,quantity_reserved,average_unit_cost_kes
-  ) values (
-    new.business_id,new.warehouse_id,new.product_id,0,0,0
-  )
-  on conflict (business_id,warehouse_id,product_id) do nothing;
-
-  select quantity_on_hand,quantity_reserved,average_unit_cost_kes
-    into v_on_hand,v_reserved,v_average
-  from public.inventory_balances
-  where business_id=new.business_id
-    and warehouse_id=new.warehouse_id
-    and product_id=new.product_id
-  for update;
-
-  v_new_on_hand := v_on_hand + new.quantity_delta;
-  v_new_reserved := v_reserved + new.quantity_reserved_delta;
-
-  if v_new_on_hand < 0 then
-    raise exception 'Insufficient stock on hand for product %',new.product_id;
-  end if;
-  if v_new_reserved < 0 then
-    raise exception 'Reserved stock cannot become negative for product %',new.product_id;
-  end if;
-  if v_new_reserved > v_new_on_hand then
-    raise exception 'Reserved stock cannot exceed stock on hand for product %',new.product_id;
-  end if;
-
-  v_new_average := v_average;
-  if new.quantity_delta > 0 and new.unit_cost_kes is not null then
-    if v_new_on_hand = 0 then
-      v_new_average := new.unit_cost_kes;
-    else
-      v_new_average := round(
-        ((v_on_hand * v_average) + (new.quantity_delta * new.unit_cost_kes))
-        / v_new_on_hand,4
-      );
-    end if;
-  end if;
-
-  update public.inventory_balances
-  set quantity_on_hand=v_new_on_hand,
-      quantity_reserved=v_new_reserved,
-      average_unit_cost_kes=v_new_average,
-      updated_at=now()
-  where business_id=new.business_id
-    and warehouse_id=new.warehouse_id
-    and product_id=new.product_id;
-
-  return new;
-end;
-$$;
-
-create trigger stock_movement_updates_balance
-after insert on public.stock_movements
-for each row execute function private.project_stock_movement_to_balance();
-
-create or replace function private.apply_stock_movement_impl(
-  p_business_id uuid,
-  p_warehouse_id uuid,
-  p_product_id uuid,
-  p_movement_type text,
-  p_quantity_delta numeric,
-  p_quantity_reserved_delta numeric default 0,
-  p_unit_cost_kes numeric default null,
-  p_reference_type text default null,
-  p_reference_id uuid default null,
-  p_notes text default null
-)
-returns uuid
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  v_uid uuid := (select auth.uid());
-  v_location_id uuid;
-  v_id uuid := gen_random_uuid();
-begin
-  if v_uid is null then
-    raise exception 'Authenticated staff session required' using errcode='42501';
-  end if;
-
-  select location_id into v_location_id
-  from public.warehouses
-  where business_id=p_business_id and id=p_warehouse_id and is_active
-  for share;
-  if not found then raise exception 'Active warehouse not found for this business'; end if;
-
-  if not (
-    private.has_business_permission(p_business_id,'inventory.manage',v_location_id)
-    or private.has_business_permission(p_business_id,'procurement.manage',v_location_id)
-  ) then
-    raise exception 'Not authorized to change inventory at this location' using errcode='42501';
-  end if;
-
-  if p_movement_type not in ('receipt','sale','reservation','release','transfer_in','transfer_out','adjustment','return') then
-    raise exception 'Unsupported stock movement type';
-  end if;
-  if p_movement_type='reservation' then
-    if p_quantity_delta <> 0 or p_quantity_reserved_delta <= 0 then
-      raise exception 'Reservation requires zero on-hand delta and a positive reserved delta';
-    end if;
-  elsif p_movement_type='release' then
-    if p_quantity_delta <> 0 or p_quantity_reserved_delta >= 0 then
-      raise exception 'Release requires zero on-hand delta and a negative reserved delta';
-    end if;
-  else
-    if p_quantity_delta = 0 or p_quantity_reserved_delta <> 0 then
-      raise exception 'Physical stock movements require a non-zero on-hand delta and zero reserved delta';
-    end if;
-    if p_movement_type in ('receipt','return','transfer_in') and p_quantity_delta <= 0 then
-      raise exception 'This movement type requires a positive quantity';
-    end if;
-    if p_movement_type in ('sale','transfer_out') and p_quantity_delta >= 0 then
-      raise exception 'This movement type requires a negative quantity';
-    end if;
-  end if;
-
-  if p_unit_cost_kes is not null and p_unit_cost_kes < 0 then
-    raise exception 'Unit cost cannot be negative';
-  end if;
-  if p_movement_type in ('receipt','return','transfer_in') and p_unit_cost_kes is null then
-    raise exception 'A KES unit cost is required for incoming stock';
-  end if;
-
-  insert into public.stock_movements(
-    id,business_id,warehouse_id,product_id,movement_type,quantity_delta,
-    quantity_reserved_delta,unit_cost_kes,currency_code,reference_type,
-    reference_id,notes,created_by
-  ) values (
-    v_id,p_business_id,p_warehouse_id,p_product_id,p_movement_type,p_quantity_delta,
-    p_quantity_reserved_delta,p_unit_cost_kes,'KES',p_reference_type,
-    p_reference_id,p_notes,v_uid
-  );
-
-  return v_id;
-end;
-$$;
-
-create or replace function public.record_stock_movement(
-  p_business_id uuid,
-  p_warehouse_id uuid,
-  p_product_id uuid,
-  p_movement_type text,
-  p_quantity_delta numeric,
-  p_unit_cost_kes numeric default null,
-  p_notes text default null
-)
-returns uuid
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-begin
-  if not private.has_business_permission(
-    p_business_id,'inventory.manage',
-    (select w.location_id from public.warehouses w where w.business_id=p_business_id and w.id=p_warehouse_id)
-  ) then
-    raise exception 'Inventory management permission required' using errcode='42501';
-  end if;
-  return private.apply_stock_movement_impl(
-    p_business_id,p_warehouse_id,p_product_id,p_movement_type,
-    p_quantity_delta,0,p_unit_cost_kes,'manual',null,p_notes
-  );
-end;
-$$;
-
-create or replace function public.reserve_stock(
-  p_business_id uuid,p_warehouse_id uuid,p_product_id uuid,p_quantity numeric,p_reference_type text,p_reference_id uuid
-)
-returns uuid
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-begin
-  if p_quantity <= 0 then raise exception 'Reservation quantity must be positive'; end if;
-  if not private.has_business_permission(
-    p_business_id,'inventory.manage',
-    (select w.location_id from public.warehouses w where w.business_id=p_business_id and w.id=p_warehouse_id)
-  ) then
-    raise exception 'Inventory management permission required' using errcode='42501';
-  end if;
-  return private.apply_stock_movement_impl(
-    p_business_id,p_warehouse_id,p_product_id,'reservation',0,p_quantity,
-    null,p_reference_type,p_reference_id,'Stock reserved'
-  );
-end;
-$$;
-
-create or replace function public.release_stock(
-  p_business_id uuid,p_warehouse_id uuid,p_product_id uuid,p_quantity numeric,p_reference_type text,p_reference_id uuid
-)
-returns uuid
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-begin
-  if p_quantity <= 0 then raise exception 'Release quantity must be positive'; end if;
-  if not private.has_business_permission(
-    p_business_id,'inventory.manage',
-    (select w.location_id from public.warehouses w where w.business_id=p_business_id and w.id=p_warehouse_id)
-  ) then
-    raise exception 'Inventory management permission required' using errcode='42501';
-  end if;
-  return private.apply_stock_movement_impl(
-    p_business_id,p_warehouse_id,p_product_id,'release',0,-p_quantity,
-    null,p_reference_type,p_reference_id,'Stock reservation released'
-  );
-end;
-$$;
-
-create or replace function public.transfer_stock(
-  p_business_id uuid,p_from_warehouse_id uuid,p_to_warehouse_id uuid,
-  p_product_id uuid,p_quantity numeric,p_notes text default null
-)
-returns uuid
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-declare
-  v_from_location uuid;
-  v_to_location uuid;
-  v_cost numeric(18,4);
-  v_reference uuid := gen_random_uuid();
-begin
-  if p_quantity <= 0 then raise exception 'Transfer quantity must be positive'; end if;
-  select location_id into v_from_location from public.warehouses
-    where business_id=p_business_id and id=p_from_warehouse_id and is_active;
-  select location_id into v_to_location from public.warehouses
-    where business_id=p_business_id and id=p_to_warehouse_id and is_active;
-  if v_from_location is null or v_to_location is null then
-    raise exception 'Both warehouses must be active and belong to this business';
-  end if;
-  if p_from_warehouse_id=p_to_warehouse_id then raise exception 'Source and destination warehouses must differ'; end if;
-  if not private.has_business_permission(p_business_id,'inventory.manage',v_from_location)
-     or not private.has_business_permission(p_business_id,'inventory.manage',v_to_location) then
-    raise exception 'Inventory management permission is required at both warehouse locations' using errcode='42501';
-  end if;
-
-  select average_unit_cost_kes into v_cost
-  from public.inventory_balances
-  where business_id=p_business_id and warehouse_id=p_from_warehouse_id and product_id=p_product_id
-  for update;
-  if not found then raise exception 'No stock balance exists at the source warehouse'; end if;
-
-  perform private.apply_stock_movement_impl(
-    p_business_id,p_from_warehouse_id,p_product_id,'transfer_out',-p_quantity,0,null,
-    'stock_transfer',v_reference,p_notes
-  );
-  perform private.apply_stock_movement_impl(
-    p_business_id,p_to_warehouse_id,p_product_id,'transfer_in',p_quantity,0,coalesce(v_cost,0),
-    'stock_transfer',v_reference,p_notes
-  );
-  return v_reference;
-end;
-$$;
-
--- ---------------------------------------------------------------------------
 -- Goods receipt posting: receipt, ledger movement, balance and PO quantities
 -- commit or roll back together.
 -- ---------------------------------------------------------------------------
@@ -322,11 +44,12 @@ begin
   for update;
   if not found then raise exception 'Goods receipt not found'; end if;
   if v_receipt.status <> 'draft' then raise exception 'Only draft goods receipts can be posted'; end if;
-  if not (
-    private.has_business_permission(p_business_id,'inventory.manage',v_receipt.location_id)
-    or private.has_business_permission(p_business_id,'procurement.manage',v_receipt.location_id)
-  ) then
-    raise exception 'Procurement or inventory management permission required' using errcode='42501';
+  if not private.has_business_permission(p_business_id,'inventory.manage',v_receipt.location_id) then
+    raise exception 'Inventory management permission required to post a goods receipt' using errcode='42501';
+  end if;
+  if v_receipt.purchase_order_id is not null
+     and not private.has_business_permission(p_business_id,'procurement.manage',v_receipt.location_id) then
+    raise exception 'Procurement management permission required to update the purchase order' using errcode='42501';
   end if;
 
   if not exists(select 1 from public.goods_receipt_items where business_id=p_business_id and goods_receipt_id=p_goods_receipt_id) then
@@ -340,9 +63,9 @@ begin
     for update
   loop
     if v_item.condition_status='good' then
-      perform private.apply_stock_movement_impl(
-        p_business_id,v_receipt.warehouse_id,v_item.product_id,'receipt',
-        v_item.received_quantity,0,v_item.unit_landed_cost_kes,
+      perform private.receive_stock_impl(
+        p_business_id,v_receipt.warehouse_id,v_item.product_id,
+        v_item.received_quantity,v_item.unit_landed_cost_kes,
         'goods_receipt',p_goods_receipt_id,
         'Goods receipt '||v_receipt.receipt_number
       );
@@ -547,7 +270,7 @@ begin
     case when v_quote.quote_type='garage' then 'garage'
          when v_quote.quote_type='import' then 'import'
          when v_quote.quote_type='spare_parts' then 'online' else 'other' end,
-    'confirmed',v_quote.currency_code,v_quote.exchange_rate_to_kes,
+    'draft',v_quote.currency_code,v_quote.exchange_rate_to_kes,
     v_quote.subtotal_amount,v_quote.discount_amount,v_quote.tax_amount,v_quote.total_amount,
     v_quote.subtotal_kes,v_quote.discount_kes,v_quote.tax_kes,v_quote.total_kes,
     v_quote.customer_notes,v_quote.internal_notes,v_uid,v_uid
@@ -564,6 +287,9 @@ begin
   from public.quotation_items
   where business_id=p_business_id and quotation_id=p_quotation_id
   order by line_number;
+
+  update public.sales_orders set status='confirmed',confirmed_at=now(),updated_by=v_uid,updated_at=now()
+  where business_id=p_business_id and id=v_order_id;
 
   update public.quotations
   set status='converted',converted_at=now(),updated_by=v_uid,updated_at=now()
@@ -634,28 +360,58 @@ begin
 end;
 $$;
 
--- Internal trigger/function permissions.
-revoke all on function private.guard_stock_movement_immutable() from public,anon,authenticated;
-revoke all on function private.project_stock_movement_to_balance() from public,anon,authenticated;
-revoke all on function private.apply_stock_movement_impl(uuid,uuid,uuid,text,numeric,numeric,numeric,text,uuid,text) from public,anon;
-revoke all on function private.recalculate_commercial_document_totals() from public,anon,authenticated;
-revoke all on function private.post_goods_receipt_impl(uuid,uuid) from public,anon;
-grant execute on function private.post_goods_receipt_impl(uuid,uuid) to authenticated;
-grant usage on schema private to authenticated;
-grant execute on function private.apply_stock_movement_impl(uuid,uuid,uuid,text,numeric,numeric,numeric,text,uuid,text) to authenticated;
+-- Permit the controlled accepted -> converted quotation transition only.
+create policy "Sales staff convert accepted quotations"
+on public.quotations for update to authenticated
+using (
+  status='accepted'
+  and private.has_business_permission(business_id,'quotations.manage',location_id)
+  and private.has_business_permission(business_id,'sales.manage',location_id)
+)
+with check (
+  status='converted'
+  and private.has_business_permission(business_id,'quotations.manage',location_id)
+  and private.has_business_permission(business_id,'sales.manage',location_id)
+);
 
-revoke all on function public.record_stock_movement(uuid,uuid,uuid,text,numeric,numeric,text) from public,anon;
-revoke all on function public.reserve_stock(uuid,uuid,uuid,numeric,text,uuid) from public,anon;
-revoke all on function public.release_stock(uuid,uuid,uuid,numeric,text,uuid) from public,anon;
-revoke all on function public.transfer_stock(uuid,uuid,uuid,uuid,numeric,text) from public,anon;
+-- Prevent moving a line item between documents; otherwise old totals could remain stale.
+create or replace function private.prevent_commercial_line_reparent()
+returns trigger language plpgsql set search_path = ''
+as $$
+begin
+  if tg_table_name='quotation_items' and new.quotation_id is distinct from old.quotation_id then
+    raise exception 'Quotation line items cannot be moved between quotations';
+  elsif tg_table_name='sales_order_items' and new.sales_order_id is distinct from old.sales_order_id then
+    raise exception 'Sales order line items cannot be moved between orders';
+  elsif tg_table_name='invoice_items' and new.invoice_id is distinct from old.invoice_id then
+    raise exception 'Invoice line items cannot be moved between invoices';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger quotation_items_parent_immutable
+before update on public.quotation_items
+for each row execute function private.prevent_commercial_line_reparent();
+create trigger sales_order_items_parent_immutable
+before update on public.sales_order_items
+for each row execute function private.prevent_commercial_line_reparent();
+create trigger invoice_items_parent_immutable
+before update on public.invoice_items
+for each row execute function private.prevent_commercial_line_reparent();
+
+-- Internal function permissions. Existing stock operations remain the only
+-- public entry points for manual receipts, adjustments, reservations and transfers.
+revoke all on function private.guard_stock_movement_immutable() from public,anon,authenticated;
+revoke all on function private.recalculate_commercial_document_totals() from public,anon,authenticated;
+revoke all on function private.prevent_commercial_line_reparent() from public,anon,authenticated;
+revoke all on function private.post_goods_receipt_impl(uuid,uuid) from public,anon;
+grant usage on schema private to authenticated;
+grant execute on function private.post_goods_receipt_impl(uuid,uuid) to authenticated;
+
 revoke all on function public.post_goods_receipt(uuid,uuid) from public,anon;
 revoke all on function public.convert_accepted_quotation_to_order(uuid,uuid,text) from public,anon;
 revoke all on function public.create_invoice_from_sales_order(uuid,uuid,text,date) from public,anon;
-
-grant execute on function public.record_stock_movement(uuid,uuid,uuid,text,numeric,numeric,text) to authenticated;
-grant execute on function public.reserve_stock(uuid,uuid,uuid,numeric,text,uuid) to authenticated;
-grant execute on function public.release_stock(uuid,uuid,uuid,numeric,text,uuid) to authenticated;
-grant execute on function public.transfer_stock(uuid,uuid,uuid,uuid,numeric,text) to authenticated;
 grant execute on function public.post_goods_receipt(uuid,uuid) to authenticated;
 grant execute on function public.convert_accepted_quotation_to_order(uuid,uuid,text) to authenticated;
 grant execute on function public.create_invoice_from_sales_order(uuid,uuid,text,date) to authenticated;
