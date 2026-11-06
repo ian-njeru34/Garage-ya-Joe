@@ -112,7 +112,7 @@ declare
   v_old_cost numeric(18,4);
   v_new_avg numeric(18,4);
 begin
-  if v_user_id is null or not private.has_business_permission(p_business_id, 'inventory.manage') then
+  if v_user_id is null then
     raise exception 'Not authorized to receive stock' using errcode = '42501';
   end if;
   if p_quantity is null or p_quantity <= 0 or p_unit_cost_kes is null or p_unit_cost_kes < 0 then
@@ -185,7 +185,7 @@ declare
   v_qty numeric(18,3);
   v_reserved numeric(18,3);
 begin
-  if v_user_id is null or not private.has_business_permission(p_business_id, 'inventory.manage') then
+  if v_user_id is null then
     raise exception 'Not authorized to adjust stock' using errcode = '42501';
   end if;
   if p_quantity_delta is null or p_quantity_delta = 0 or nullif(trim(p_reason), '') is null then
@@ -260,7 +260,7 @@ declare
   v_available numeric(18,3);
   v_movement_id uuid;
 begin
-  if v_user_id is null or not private.has_business_permission(p_business_id, 'inventory.manage') then
+  if v_user_id is null then
     raise exception 'Not authorized to reserve stock' using errcode = '42501';
   end if;
   if p_quantity is null or p_quantity <= 0 or nullif(trim(p_reference_type), '') is null or p_reference_id is null then
@@ -321,7 +321,7 @@ declare
   v_reserved numeric(18,3);
   v_movement_id uuid;
 begin
-  if v_user_id is null or not private.has_business_permission(p_business_id, 'inventory.manage') then
+  if v_user_id is null then
     raise exception 'Not authorized to release stock reservations' using errcode = '42501';
   end if;
   if p_quantity is null or p_quantity <= 0 or nullif(trim(p_reference_type), '') is null or p_reference_id is null then
@@ -381,7 +381,7 @@ declare
   v_destination_cost numeric(18,4);
   v_transfer_id uuid := gen_random_uuid();
 begin
-  if v_user_id is null or not private.has_business_permission(p_business_id, 'inventory.manage') then
+  if v_user_id is null then
     raise exception 'Not authorized to transfer stock' using errcode = '42501';
   end if;
   if p_source_warehouse_id = p_destination_warehouse_id or p_quantity is null or p_quantity <= 0 then
