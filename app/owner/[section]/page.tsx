@@ -75,7 +75,7 @@ export default function OwnerModulePage() {
     <main className="shell">
       <header className="top"><a href="/owner" className="back"><ArrowLeft size={16}/> Owner overview</a><span className="identity"><ShieldCheck size={15}/> {email}</span></header>
       <section className="content">
-        <div className="eyebrow">GARAGE YA JOE · OWNER WORKSPACE</div>
+        <div className="eyebrow">THE GARAGE · OWNER WORKSPACE</div>
         <div className="heading"><div className="icon"><Icon size={25}/></div><div><h1>{item.title}</h1><p>{item.description}</p></div></div>
         <div className="status"><Construction size={18}/><div><b>Module setup in progress</b><p>This section is now connected to the owner workspace. Its operational screens and actions are being implemented; no transactions can be created here yet.</p></div></div>
         <h2>Planned capabilities</h2>
