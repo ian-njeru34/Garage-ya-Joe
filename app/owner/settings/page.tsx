@@ -19,11 +19,6 @@ export default function OwnerSettingsPage(){
  const db=sb();const {data:{user}}=await db.auth.getUser();const {error:saveError}=await db.from("business_social_links").upsert({business_id:businessId,whatsapp_number:phone||null,facebook_url:facebook.trim()||null,youtube_url:youtube.trim()||null,instagram_url:instagram.trim()||null,x_url:xUrl.trim()||null,updated_by:user?.id,updated_at:new Date().toISOString()},{onConflict:"business_id"});
  if(saveError)setError(saveError.message);else setSuccess("Social links saved. Available links will appear in the public website footer.");setSaving(false);
  }
- if(phone&&!/^\\+?[0-9][0-9 ()-]{6,19}$/.test(phone)){setError("Enter a valid WhatsApp number with country code, e.g. +2547XXXXXXXX.");setSaving(false);return}
- const invalid=links.find(([,value,pattern])=>value&&!pattern.test(value));if(invalid){setError("Enter a full public "+invalid[0]+" URL beginning with https://.");setSaving(false);return}
- const db=sb();const {data:{user}}=await db.auth.getUser();const {error:saveError}=await db.from("business_social_links").upsert({business_id:businessId,whatsapp_number:phone||null,facebook_url:facebook.trim()||null,youtube_url:youtube.trim()||null,instagram_url:instagram.trim()||null,x_url:xUrl.trim()||null,updated_by:user?.id,updated_at:new Date().toISOString()},{onConflict:"business_id"});
- if(saveError)setError(saveError.message);else setSuccess("Social links saved. Available links will appear in the public website footer.");setSaving(false);
- }
  if(loading)return <main className="settings-state">Loading business settings…</main>;
  return <main className="settings-page"><header><a href="/owner"><ArrowLeft size={16}/> Owner dashboard</a><span>BUSINESS SETTINGS</span></header><section><div className="intro"><span>PUBLIC CONTACT DETAILS</span><h1>Social & WhatsApp links</h1><p>Set the contact details customers should use. Saved links will appear in the footer across the public website.</p></div><form onSubmit={save}>
  <div className="group-title">CONTACT</div>
