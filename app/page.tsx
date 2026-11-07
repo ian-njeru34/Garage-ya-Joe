@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, MapPin, Phone, Droplet, Filter, Cog, CheckCircle2 } from "lucide-react";
 import ScrollExperience from "./components/scroll-experience";
 import BackToTop from "./components/back-to-top";
+import ServiceStory from "./components/service-story";
 
 const services = [
   { icon: Wrench, title: "Vehicle servicing", text: "Routine maintenance, diagnostics and scheduled servicing." },
@@ -43,43 +44,7 @@ export default function HomePage() {
         <div className="service-grid">{services.map(({icon:Icon,title,text},i)=><article className="service-card" data-reveal key={title}><span className="number">0{i+1}</span><div className="service-icon"><Icon size={23}/></div><h3>{title}</h3><p>{text}</p><Link href="/enquire">Explore service <ArrowRight size={15}/></Link></article>)}</div>
       </div></section>
 
-      <section className="service-story" id="care">
-        <div className="container">
-          <div className="service-story-heading" data-reveal>
-            <span className="eyebrow">THE CARE IN EVERY DETAIL</span>
-            <h2>Precision in every step.<br/><em>Confidence in every drive.</em></h2>
-            <p>Real maintenance is hands-on. Follow the mechanic through an engine-oil change, transmission service and air-filter replacement — using the right equipment and correct service procedure for each vehicle.</p>
-          </div>
-          <div className="service-sequence" aria-label="Three stages of a vehicle service">
-            <article className="service-scene oil-scene" data-reveal>
-              <div className="scene-top"><span>01 / ENGINE OIL</span><Droplet size={18}/></div>
-              <div className="scene-art photo-art oil-photo" role="img" aria-label="Mechanic draining used engine oil beneath a raised vehicle, followed by fresh oil being poured into the engine">
-                <div className="service-photo oil-drain-photo"/>
-                <div className="service-photo oil-refill-photo"/>
-                <span className="photo-caption">DRAIN OLD OIL <i/> REFILL TO SPEC</span>
-              </div>
-              <div className="scene-copy"><h3>Fresh oil. Smoother performance.</h3><p>The vehicle is raised safely, used oil is collected from the sump, the oil filter is renewed and fresh oil is added to the manufacturer’s specification.</p><span className="scene-status"><CheckCircle2 size={14}/> DRAIN · REFILL · CHECK</span></div>
-            </article>
-            <article className="service-scene gear-scene" data-reveal>
-              <div className="scene-top"><span>02 / GEAR FLUID</span><Cog size={18}/></div>
-              <div className="scene-art photo-art gear-photo" role="img" aria-label="Mechanic servicing a vehicle transmission on a hydraulic lift using transmission-fluid equipment">
-                <div className="service-photo transmission-photo"/>
-                <span className="photo-caption">TRANSMISSION SERVICE <i/> CORRECT FLUID</span>
-              </div>
-              <div className="scene-copy"><h3>Gear changes with confidence.</h3><p>The mechanic accesses the transmission on a lift, checks the system and services the fluid using the correct procedure and specification for that gearbox.</p><span className="scene-status"><CheckCircle2 size={14}/> INSPECT · DRAIN · REFILL</span></div>
-            </article>
-            <article className="service-scene filter-scene" data-reveal>
-              <div className="scene-top"><span>03 / FILTERS</span><Filter size={18}/></div>
-              <div className="scene-art photo-art filter-photo" role="img" aria-label="Mechanic removing a dirty engine air filter and fitting a clean replacement">
-                <div className="service-photo air-filter-photo"/>
-                <span className="photo-caption">REMOVE WORN FILTER <i/> FIT CLEAN FILTER</span>
-              </div>
-              <div className="scene-copy"><h3>Clean filters. Better breathing.</h3><p>The air-box is opened, the dirty pleated element is removed, the housing is checked and a correctly fitted clean filter is installed.</p><span className="scene-status"><CheckCircle2 size={14}/> CHECK · REPLACE · VERIFY</span></div>
-            </article>
-          </div>
-          <div className="service-story-foot"><span><i/> A closer look at routine vehicle care</span><Link className="text-link" href="/enquire">Book a service <ArrowRight size={16}/></Link></div>
-        </div>
-      </section>
+      <ServiceStory />
 
       <section className="process" id="how"><div className="container process-inner"><div data-reveal><span className="eyebrow">A BETTER WAY TO GET IT DONE</span><h2>Simple from the<br/><em>first hello.</em></h2><p>One clear process, with you in control at every step.</p></div><div className="steps">{[["01","Tell us what you need","Share your vehicle details, service request or part reference."],["02","Review your quotation","We confirm the scope, availability, pricing and timing."],["03","Approve and track","Proceed with the work or sourcing and stay informed."]].map(([n,t,d])=><div data-reveal key={n}><b>{n}</b><span><strong>{t}</strong><small>{d}</small></span></div>)}</div></div></section>
 
