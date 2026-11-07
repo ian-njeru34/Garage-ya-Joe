@@ -4,7 +4,6 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 export default function ScrollExperience({ children }: { children: ReactNode }) {
   const endRef = useRef<HTMLDivElement>(null);
-  const looping = useRef(false);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -20,30 +19,41 @@ export default function ScrollExperience({ children }: { children: ReactNode }) 
     document.querySelectorAll("[data-reveal]").forEach((element) => revealObserver.observe(element));
 
     let returnTimer: ReturnType<typeof setTimeout> | undefined;
-    const footerObserver = new IntersectionObserver((entries) => {
-      if (reducedMotion.matches || looping.current) return;
-      if (entries.some((entry) => entry.isIntersecting)) {
-        looping.current = true;
-        // Keep the visitor at the footer for ten full seconds.
+    let hasReturned = false;
+    let waitingAtBottom = false;
+
+    const checkPageBottom = () => {
+      if (reducedMotion.matches || hasReturned) return;
+
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 3;
+
+      if (atBottom && !waitingAtBottom) {
+        waitingAtBottom = true;
+        // Begin the full ten-second pause only once the real page bottom is reached.
         returnTimer = setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          const stillAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 3;
+          if (stillAtBottom) {
+            hasReturned = true;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            waitingAtBottom = false;
+          }
         }, 10000);
-      }
-    }, { threshold: 0.9 });
-
-    if (endRef.current) footerObserver.observe(endRef.current);
-
-    const resetLoop = () => {
-      if (window.scrollY < 100 && looping.current) {
-        looping.current = false;
+      } else if (!atBottom && waitingAtBottom) {
+        if (returnTimer) clearTimeout(returnTimer);
+        returnTimer = undefined;
+        waitingAtBottom = false;
       }
     };
-    window.addEventListener("scroll", resetLoop, { passive: true });
+
+    window.addEventListener("scroll", checkPageBottom, { passive: true });
+    window.addEventListener("resize", checkPageBottom);
+    checkPageBottom();
 
     return () => {
       revealObserver.disconnect();
-      footerObserver.disconnect();
-      window.removeEventListener("scroll", resetLoop);
+      window.removeEventListener("scroll", checkPageBottom);
+      window.removeEventListener("resize", checkPageBottom);
       if (returnTimer) clearTimeout(returnTimer);
     };
   }, []);
