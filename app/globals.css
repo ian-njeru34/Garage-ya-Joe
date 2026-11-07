@@ -72,3 +72,13 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacin
 @media(max-width:850px){.service-showcase{grid-template-columns:1fr}.service-showcase-image{min-height:350px}.service-showcase-copy{padding:32px}.service-showcase-copy>p{min-height:0}}
 @media(max-width:520px){.service-story{padding:75px 0}.service-story-heading{text-align:left}.service-showcase-image{min-height:255px}.showcase-image-top,.showcase-image-bottom{left:16px;right:16px}.service-showcase-copy{padding:27px 22px}.showcase-footer{align-items:flex-start;flex-direction:column}.service-showcase-copy>p{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.service-showcase-image,.service-showcase-copy{animation:none!important}}
+
+/* JG calligraphic monogram and consistent Care section identity */
+.brand-mark{width:58px;height:50px;filter:drop-shadow(0 5px 12px #0009)}
+.brand-mark svg{width:100%;height:100%;display:block;overflow:visible}
+.service-story-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 10px;color:#dceaf3;font:800 10px 'DM Sans';letter-spacing:.22em}
+.service-story-brand .brand-mark{width:48px;height:40px}
+.showcase-brand{display:inline-flex;align-items:center;gap:9px}
+.showcase-brand .brand-mark{width:33px;height:27px;filter:none}
+.showcase-brand .brand-mark svg{width:100%;height:100%}
+.showcase-brand i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#9cc5e2;margin:0 2px}
