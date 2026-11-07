@@ -14,10 +14,12 @@ const stages = [
 
 export default function ServiceStory() {
   const [active, setActive] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   useEffect(() => {
+    if (isPaused) return;
     const timer = window.setInterval(() => setActive((current) => (current + 1) % stages.length), 1500);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [isPaused]);
   const stage = stages[active];
   const Icon = stage.icon;
   return (
@@ -28,7 +30,17 @@ export default function ServiceStory() {
           <h2>One service. <em>Every detail.</em></h2>
           <p>Follow a real workshop service from the first inspection to the final checks. A new part of the process comes into focus every 1.5 seconds.</p>
         </div>
-        <div className="service-showcase" aria-live="polite" aria-atomic="true">
+        <div
+          className={`service-showcase${isPaused ? " is-paused" : ""}`}
+          aria-live="polite"
+          aria-atomic="true"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsPaused(false);
+          }}
+        >
           <div className="service-showcase-image" key={stage.number} role="img" aria-label={stage.alt} style={{ backgroundImage: `linear-gradient(90deg, #05090dcc 0%, #05090d55 58%, #05090d22 100%), url("${stage.image}")` }}>
             <div className="showcase-image-top"><span>GARAGE YA JOE <i /> WORKSHOP PROCESS</span><span>{stage.number} / 06</span></div>
             <div className="showcase-image-bottom"><span className="live-dot" /> LIVE SERVICE SEQUENCE</div>
@@ -41,7 +53,7 @@ export default function ServiceStory() {
             <div className="showcase-progress" aria-label={`Service step ${active + 1} of ${stages.length}`}>
               {stages.map((item, index) => <button key={item.number} type="button" className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Show step ${item.number}: ${item.label}`} aria-current={index === active ? "step" : undefined} />)}
             </div>
-            <div className="showcase-footer"><span>UPDATES AUTOMATICALLY EVERY 1.5 SECONDS</span><Link href="/enquire">Book a service <ArrowRight size={15} /></Link></div>
+            <div className="showcase-footer"><span>{isPaused ? "PAUSED · MOVE POINTER AWAY TO RESUME" : "HOVER TO PAUSE · AUTO-ADVANCES EVERY 1.5 SECONDS"}</span><Link href="/enquire">Book a service <ArrowRight size={15} /></Link></div>
           </div>
         </div>
       </div>
