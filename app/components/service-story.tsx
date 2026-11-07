@@ -28,7 +28,6 @@ export default function ServiceStory() {
         <div className="service-story-heading" data-reveal>
           <span className="eyebrow">THE CARE IN EVERY DETAIL</span>
           <h2>One service. <em>Every detail.</em></h2>
-          <p>Follow a real workshop service from the first inspection to the final checks. A new part of the process comes into focus every 1.5 seconds.</p>
         </div>
         <div
           className={`service-showcase${isPaused ? " is-paused" : ""}`}
