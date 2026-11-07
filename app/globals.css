@@ -82,3 +82,18 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacin
 .showcase-brand .brand-mark{width:33px;height:27px;filter:none}
 .showcase-brand .brand-mark svg{width:100%;height:100%}
 .showcase-brand i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#9cc5e2;margin:0 2px}
+
+/* Consistent slide geometry and dimensional JG finish */
+.service-showcase{align-items:stretch}
+.service-showcase-image{background-position:center center}
+.service-showcase-copy{min-width:0;min-height:440px;display:grid;grid-template-rows:auto 52px minmax(2.4em,auto) minmax(88px,auto) auto auto 1fr;align-content:center;justify-items:start}
+.service-showcase-copy h3{min-height:2.4em;display:flex;align-items:flex-end}
+.service-showcase-copy>p{min-height:88px;align-self:start}
+.service-showcase-copy .showcase-footer{align-self:end}
+.showcase-brand{white-space:nowrap}
+.brand-mark{isolation:isolate}
+.brand-mark svg{overflow:visible;filter:drop-shadow(0 2px 1px #0009)}
+.service-story-brand .brand-mark{width:52px;height:44px}
+.showcase-brand .brand-mark{width:35px;height:30px}
+@media(max-width:850px){.service-showcase-copy{min-height:390px;grid-template-rows:auto 52px minmax(2.4em,auto) auto auto auto auto}.service-showcase-copy h3{min-height:0;display:block}}
+@media(max-width:520px){.service-showcase-copy{min-height:0;display:flex}.service-showcase-copy h3{min-height:0}.service-showcase-copy>p{min-height:0}}
