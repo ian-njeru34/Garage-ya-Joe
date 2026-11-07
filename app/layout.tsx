@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Garage ya Joe | Garage & Auto Spares",
-  description: "Vehicle servicing, repairs, spare parts and special-order imports in one place."
+  title: "The Garage | Automotive Care & Auto Spares",
+  description: "The Garage — expert vehicle servicing, repairs, quality auto spares and specialist parts sourcing."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
