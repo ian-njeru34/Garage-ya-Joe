@@ -147,7 +147,6 @@ Deno.serve(async (request: Request) => {
         const { data: requests, error } = await admin.from("spare_requests")
           .select("id,part_name,part_number,vehicle_make,vehicle_model,vehicle_year,quantity,customer_notes,status,created_at")
           .eq("business_id", dealer.business_id)
-          .eq("assigned_dealer_id", dealerUser.id)
           .order("created_at", { ascending: false });
         if (error) throw error;
         return json({ ok: true, requests: requests ?? [] });
@@ -168,22 +167,21 @@ Deno.serve(async (request: Request) => {
       }
       const { data: assignedRequest, error: requestError } = await admin.from("spare_requests")
         .select("id,business_id").eq("id", requestId)
-        .eq("business_id", dealer.business_id)
-        .eq("assigned_dealer_id", dealerUser.id).maybeSingle();
-      if (requestError || !assignedRequest) return json({ error: "This request is not assigned to your dealer account." }, 403);
+        .eq("business_id", dealer.business_id).maybeSingle();
+      if (requestError || !assignedRequest) return json({ error: "This spare request is not available." }, 404);
 
-      const { error: responseError } = await admin.from("spare_request_responses").insert({
+      const { error: responseError } = await admin.from("spare_request_responses").upsert({
         business_id: dealer.business_id, spare_request_id: requestId,
         dealer_profile_id: dealerUser.id, availability,
         quoted_unit_price: price, currency_code: "KES",
         estimated_days: days, estimated_shipping_kes: shipping,
         response_notes: clean(body.notes, 1000) || null,
-      });
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "spare_request_id,dealer_profile_id" });
       if (responseError) throw responseError;
       const { error: updateError } = await admin.from("spare_requests")
         .update({ status: "dealer_responded", updated_at: new Date().toISOString() })
-        .eq("id", requestId).eq("business_id", dealer.business_id)
-        .eq("assigned_dealer_id", dealerUser.id);
+        .eq("id", requestId).eq("business_id", dealer.business_id);
       if (updateError) throw updateError;
       return json({ ok: true, message: "Your quote has been sent to The Garage owner." });
     }
@@ -225,6 +223,7 @@ Deno.serve(async (request: Request) => {
       const { error: savePriceError } = await admin.from("owner_spare_pricing").upsert({
         business_id: ownerRole.business_id,
         spare_request_id: requestId,
+        selected_response_id: responseId,
         markup_percent: markupPercent,
         markup_fixed_kes: markupFixed,
         customer_unit_price_kes: customerUnit,
