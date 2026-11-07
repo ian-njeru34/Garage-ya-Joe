@@ -112,6 +112,17 @@ revoke all on public.spare_request_responses from anon,authenticated;
 grant select on public.spare_request_responses to authenticated;
 grant all on public.spare_request_responses to service_role;
 
+-- Ensure the single-business installation has a usable business and booking location.
+-- Existing business/location records are preserved.
+insert into public.businesses(name,legal_name,base_currency)
+select 'The Garage', 'The Garage', 'KES'
+where not exists(select 1 from public.businesses);
+
+insert into public.locations(business_id,code,name,location_type,is_active)
+select b.id,'MAIN','Main Garage','garage',true
+from public.businesses b
+where not exists(select 1 from public.locations l where l.business_id=b.id);
+
 -- Auth trigger provisions only the public customer role. Public metadata can never
 -- grant staff, owner or dealer access. The first configured business is used.
 create or replace function public.provision_auth_profile()
