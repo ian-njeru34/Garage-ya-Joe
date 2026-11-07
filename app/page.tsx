@@ -5,6 +5,7 @@ import ScrollExperience from "./components/scroll-experience";
 import BackToTop from "./components/back-to-top";
 import ServiceStory from "./components/service-story";
 import GarageLogo from "./components/garage-logo";
+import VehicleAdSlider from "./components/vehicle-ad-slider";
 
 const services = [
   { icon: Wrench, title: "Vehicle servicing", text: "Routine maintenance, diagnostics and scheduled servicing." },
@@ -17,7 +18,7 @@ export default function HomePage() {
   return <ScrollExperience>
     <main>
       <div id="top" />
-      <div className="utility"><div className="container utility-inner"><span><MapPin size={13}/> AUTOMOTIVE CARE · KENYA</span><Link href="/customer">Customer account <ArrowRight size={13}/></Link></div></div>
+      <div className="utility"><div className="container utility-inner"><span><MapPin size={13}/> AUTOMOTIVE CARE · KENYA</span><div className="utility-actions"><a href="#garage-call" aria-label="Call The Garage"><Phone size={15}/> Call us</a><Link href="/customer">Customer account <ArrowRight size={13}/></Link></div></div></div>
       <header className="site-header"><div className="container nav">
         <Link className="brand" href="/" aria-label="The Garage home"><GarageLogo /><span className="brand-wordmark">THE <b>GARAGE</b><small>CARE · PERFORMANCE · PARTS</small></span></Link>
         <nav><a href="#services">Services</a><a href="#spares">Auto spares</a><a href="#how">Our process</a><a href="#contact">Contact</a></nav>
@@ -46,9 +47,9 @@ export default function HomePage() {
 
       <section className="process" id="how"><div className="container process-inner"><div data-reveal><span className="eyebrow">A BETTER WAY TO GET IT DONE</span><h2>Simple from the<br/><em>first hello.</em></h2><p>One clear process, with you in control at every step.</p></div><div className="steps">{[["01","Tell us what you need","Share your vehicle details, service request or part reference."],["02","Review your quotation","We confirm the scope, availability, pricing and timing."],["03","Approve and track","Proceed with the work or sourcing and stay informed."]].map(([n,t,d])=><div data-reveal key={n}><b>{n}</b><span><strong>{t}</strong><small>{d}</small></span></div>)}</div></div></section>
 
-      <section className="contact" id="contact"><div className="container contact-box" data-reveal><div><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p></div><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Contact details can be managed from business settings.</small></div></div></section>
+      <section className="contact" id="contact"><div className="container contact-split"><div className="vehicle-ad-column"><VehicleAdSlider/></div><div className="contact-box" data-reveal><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Call or message our team.</small></div></div></div></section>
 
-      <SiteFooter />
+      <div className="home-call-bar" id="garage-call"><a href="tel:" aria-label="Call The Garage"><Phone size={17}/><span>Call The Garage</span></a></div><SiteFooter />
       <BackToTop />
     </main>
   </ScrollExperience>;
