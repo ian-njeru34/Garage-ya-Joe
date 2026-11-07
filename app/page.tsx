@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, MapPin, Phone, Droplet, Filter, Cog, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Gauge, Settings2, MapPin, Phone, Droplet, Filter, Cog, CheckCircle2 } from "lucide-react";
 import ScrollExperience from "./components/scroll-experience";
 import BackToTop from "./components/back-to-top";
 import ServiceStory from "./components/service-story";
@@ -28,8 +28,8 @@ export default function HomePage() {
         <div className="hero-shade" />
         <div className="container hero-content">
           <div className="hero-copy" data-reveal>
-            <span className="eyebrow"><i/> THIS VALENTINE'S, SHOW YOUR CAR SOME LOVE</span>
-            <h1>Love your drive.<br/><em>Trust the care.</em></h1>
+            <span className="eyebrow"><i/> AUTOMOTIVE CARE YOU CAN TRUST</span>
+            <h1>Every journey.<br/><em>Handled with care.</em></h1>
             <p>Expert garage care, quality auto spares and hard-to-find imports — all in one place. Your journey deserves the right attention.</p>
             <div className="hero-actions"><Link className="button primary" href="/enquire">Book a garage service <ArrowRight size={17}/></Link><Link className="button ghost" href="/spares">Find a spare part</Link></div>
             <div className="trust"><span><ShieldCheck size={16}/> Clear quotations</span><span><Clock3 size={16}/> Updates you can trust</span></div>
