@@ -24,9 +24,10 @@ export default function ScrollExperience({ children }: { children: ReactNode }) 
       if (reducedMotion.matches || looping.current) return;
       if (entries.some((entry) => entry.isIntersecting)) {
         looping.current = true;
+        // Let visitors remain at the footer for a full five seconds.
         returnTimer = setTimeout(() => {
           window.scrollTo({ top: 0, behavior: "smooth" });
-        }, 850);
+        }, 5000);
       }
     }, { threshold: 0.9 });
 
