@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import GarageLogo from "../components/garage-logo";
 
 export default function CustomerSignInPage() {
   const router = useRouter();
@@ -57,10 +58,10 @@ export default function CustomerSignInPage() {
   return (
     <main className="signin-shell">
       <section className="signin-card">
-        <a className="brand" href="/">GARAGE <b>YA JOE</b></a>
+        <a className="brand" href="/" aria-label="The Garage home"><GarageLogo /><span>THE GARAGE</span></a>
         <span className="eyebrow">CUSTOMER ACCOUNT</span>
         <h1>Sign in</h1>
-        <p className="intro">Sign in to your Garage ya Joe account.</p>
+        <p className="intro">Sign in to your The Garage account.</p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="email">Email address</label>
           <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -71,12 +72,12 @@ export default function CustomerSignInPage() {
           <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
         </form>
         <a className="forgot" href="/auth/forgot-password">Forgot your password?</a>
-        <a className="back" href="/">Back to Garage ya Joe</a>
+        <a className="back" href="/">Back to The Garage</a>
       </section>
       <style jsx>{`
         .signin-shell{min-height:100vh;background:#f5f6f1;display:grid;place-items:center;padding:32px 16px;color:#17231f;font-family:Arial,sans-serif}
         .signin-card{width:min(100%,460px);background:#fff;border:1px solid #e3e8df;border-radius:10px;padding:40px;box-shadow:0 18px 55px #142d2110}
-        .brand{display:inline-block;color:#1e493b;font-weight:800;letter-spacing:.08em;font-size:17px;margin-bottom:42px}
+        .brand{display:flex;align-items:center;gap:12px;color:#1e493b;font-weight:800;letter-spacing:.12em;font-size:17px;margin-bottom:42px}.brand :global(.brand-mark){width:58px;height:46px}
         .eyebrow{display:block;color:#71816f;font-size:10px;font-weight:700;letter-spacing:.16em}
         h1{font-size:30px;letter-spacing:-.04em;margin:12px 0}
         .intro{color:#66736d;font-size:14px;line-height:1.7}
