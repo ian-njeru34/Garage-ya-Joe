@@ -2,7 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import { ArrowLeft, ArrowRight, Check, Copy, Wrench } from "lucide-react";
+
+const sb=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default function EnquirePage() {
   const [name,setName]=useState("");
@@ -22,9 +25,9 @@ export default function EnquirePage() {
     setBusy(true);setError("");setSuccess("");setPrepared("");
     const website=String(new FormData(event.currentTarget).get("website")||"");
     try{
-      const response=await fetch("/api/public/requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"enquiry",fullName:name,whatsapp:phone,email,vehicleDetails:vehicle,enquiryType:request,details,website})});
-      const result=await response.json();
-      if(!response.ok)throw new Error(result.error||"Your enquiry could not be saved.");
+      const {data:result,error:invokeError}=await sb().functions.invoke("garage-portal",{body:{action:"public_request",kind:"enquiry",fullName:name,whatsapp:phone,email,vehicleDetails:vehicle,enquiryType:request,details,website}});
+      if(invokeError)throw invokeError;
+      if(result?.error)throw new Error(result.error);
       setSuccess("Your enquiry has been received by The Garage.");
     }catch(error){setError(error instanceof Error?error.message:"Your enquiry could not be saved. Please try again.");setBusy(false);return;}
     const message=[
