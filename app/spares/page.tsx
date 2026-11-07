@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import { ArrowLeft, ArrowRight, Search, CarFront, Wrench, PackageSearch, Ship } from "lucide-react";
+
+const sb=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default function SparesPage(){
  const [part,setPart]=useState("");
@@ -12,7 +15,7 @@ export default function SparesPage(){
  const [ready,setReady]=useState(false);
  const [name,setName]=useState("");const [whatsapp,setWhatsapp]=useState("");const [email,setEmail]=useState("");
  const [busy,setBusy]=useState(false);const [error,setError]=useState("");const [success,setSuccess]=useState("");
- async function submitRequest(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const website=String(new FormData(e.currentTarget).get("website")||"");setBusy(true);setError("");setSuccess("");try{const response=await fetch("/api/public/requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"spare",fullName:name,whatsapp,email,partName:part,partNumber:reference,vehicleMake:vehicle,vehicleModel:"",quantity:1,notes:"Category: "+category,website})});const result=await response.json();if(!response.ok)throw new Error(result.error||"Your request could not be saved.");setSuccess("Your spare-parts request has been received. The owner can contact you on WhatsApp.");setPart("");setReference("");setVehicle("");}catch(e){setError(e instanceof Error?e.message:"Your request could not be saved. Please try again.");}finally{setBusy(false)}}
+ async function submitRequest(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const website=String(new FormData(e.currentTarget).get("website")||"");setBusy(true);setError("");setSuccess("");try{const {data:result,error:invokeError}=await sb().functions.invoke("garage-portal",{body:{action:"public_request",kind:"spare",fullName:name,whatsapp,email,partName:part,partNumber:reference,vehicleMake:vehicle,vehicleModel:"",quantity:1,notes:"Category: "+category,website}});if(invokeError)throw invokeError;if(result?.error)throw new Error(result.error);setSuccess("Your spare-parts request has been received. The owner can contact you on WhatsApp.");setPart("");setReference("");setVehicle("");}catch(e){setError(e instanceof Error?e.message:"Your request could not be saved. Please try again.");}finally{setBusy(false)}}
  return <main className="page">
   <header className="top"><Link href="/" className="back"><ArrowLeft size={16}/> The Garage</Link><span>PARTS · SOURCING · IMPORTS</span></header>
   <section className="hero"><span className="eyebrow"><PackageSearch size={14}/> THE PART YOU'RE LOOKING FOR</span><h1>Find the right part.<br/><em>Get back on the road.</em></h1><p>Search by part name, brand, SKU or OEM reference. If the part is not listed yet, send us the details and we'll help identify or source it.</p>
