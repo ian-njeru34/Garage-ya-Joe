@@ -97,3 +97,13 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacin
 .showcase-brand .brand-mark{width:35px;height:30px}
 @media(max-width:850px){.service-showcase-copy{min-height:390px;grid-template-rows:auto 52px minmax(2.4em,auto) auto auto auto auto}.service-showcase-copy h3{min-height:0;display:block}}
 @media(max-width:520px){.service-showcase-copy{min-height:0;display:flex}.service-showcase-copy h3{min-height:0}.service-showcase-copy>p{min-height:0}}
+
+/* Care sequence is intentionally image-free pending replacement uploads */
+.service-showcase{display:block;min-height:0;max-width:980px;margin-inline:auto}
+.service-showcase-copy{width:100%;min-height:390px;padding:clamp(30px,6vw,68px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.service-showcase-copy>p{max-width:680px;min-height:0}
+.service-showcase-copy h3{min-height:0;display:block}
+.service-showcase-copy .showcase-footer{align-self:stretch}
+.service-showcase-image,.showcase-image-top,.showcase-image-bottom,.service-story-brand,.showcase-brand{display:none!important}
+@media(max-width:850px){.service-showcase-copy{min-height:350px;padding:32px}}
+@media(max-width:520px){.service-showcase-copy{min-height:0;padding:28px 22px}.service-showcase-copy>p{font-size:12px}}
