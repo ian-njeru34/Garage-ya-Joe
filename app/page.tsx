@@ -49,7 +49,7 @@ export default function HomePage() {
 
       <section className="contact" id="contact"><div className="container contact-box" data-reveal><div><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p></div><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Contact details can be managed from business settings.</small></div></div></section>
 
-      <footer><div className="container footer"><div className="footer-brand"><span className="brand-mark">J<span>.</span></span><b>GARAGE YA JOE</b></div><span>© {new Date().getFullYear()} Garage ya Joe. All rights reserved.</span><span>Garage · Auto spares · Imports</span><a href="#top">Back to top ↑</a></div></footer>
+      <footer><div className="container footer"><div className="footer-brand"><span className="brand-mark">J<span>.</span></span><b>GARAGE YA JOE</b></div><span>© {new Date().getFullYear()} Garage ya Joe. All rights reserved.</span><span>Garage · Auto spares · Imports</span><a href="#top">Back to top ↑</a><a className="site-credit" href="https://digitalink.co.ke/" target="_blank" rel="noopener noreferrer">Site by <span>Digital Ink</span></a></div></footer>
       <BackToTop />
     </main>
   </ScrollExperience>;
