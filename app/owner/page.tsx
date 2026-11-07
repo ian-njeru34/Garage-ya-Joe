@@ -5,7 +5,7 @@ import { createClient, User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import GarageLogo from "../components/garage-logo";
 import {
-  LayoutDashboard, Wrench, Users, Package, Warehouse, Ship,
+  LayoutDashboard, Wrench, Users, Package, Warehouse, Ship, CarFront,
   FileText, ShoppingCart, Wallet, UserCog, Settings, LogOut,
   Menu, ShieldCheck, ArrowUpRight, MessageCircle
 } from "lucide-react";
