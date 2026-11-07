@@ -221,18 +221,24 @@ Deno.serve(async (request: Request) => {
       const customerUnit = Math.round((dealerUnit * (1 + markupPercent / 100) + markupFixed) * 100) / 100;
       const shipping = Number(dealerResponse.estimated_shipping_kes || 0);
       const total = Math.round((customerUnit * Number(spare.quantity) + shipping) * 100) / 100;
-      const { error: saveError } = await admin.from("spare_requests").update({
-        owner_markup_percent: markupPercent,
-        owner_markup_fixed_kes: markupFixed,
+      const publishedAt = new Date().toISOString();
+      const { error: savePriceError } = await admin.from("owner_spare_pricing").upsert({
+        business_id: ownerRole.business_id,
+        spare_request_id: requestId,
+        markup_percent: markupPercent,
+        markup_fixed_kes: markupFixed,
         customer_unit_price_kes: customerUnit,
         customer_shipping_kes: shipping,
         customer_total_kes: total,
-        customer_quote_published_at: new Date().toISOString(),
-        owner_price_updated_by: owner.id,
-        status: "quoted",
-        updated_at: new Date().toISOString(),
+        published_at: publishedAt,
+        updated_by: owner.id,
+        updated_at: publishedAt,
+      }, { onConflict: "business_id,spare_request_id" });
+      if (savePriceError) throw savePriceError;
+      const { error: saveRequestError } = await admin.from("spare_requests").update({
+        status: "quoted", updated_at: publishedAt,
       }).eq("id", requestId).eq("business_id", ownerRole.business_id);
-      if (saveError) throw saveError;
+      if (saveRequestError) throw saveRequestError;
       return json({ ok: true, customerUnit, shipping, total });
     }
 
