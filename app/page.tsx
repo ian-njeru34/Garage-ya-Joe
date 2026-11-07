@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, MapPin, Phone } from "lucide-react";
+import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, MapPin, Phone, Droplet, Filter, Cog, CheckCircle2 } from "lucide-react";
 import ScrollExperience from "./components/scroll-experience";
 import BackToTop from "./components/back-to-top";
 
@@ -43,14 +43,48 @@ export default function HomePage() {
         <div className="service-grid">{services.map(({icon:Icon,title,text},i)=><article className="service-card" data-reveal key={title}><span className="number">0{i+1}</span><div className="service-icon"><Icon size={23}/></div><h3>{title}</h3><p>{text}</p><Link href="/enquire">Explore service <ArrowRight size={15}/></Link></article>)}</div>
       </div></section>
 
-      <section className="feature-band"><div className="container feature-inner"><div className="feature-image" data-reveal><div className="engine-motion" aria-hidden="true">
-  <svg className="belt-path" viewBox="0 0 600 360" preserveAspectRatio="none">
-    <path className="belt-track" d="M145 95 C190 35 295 35 335 95 L430 230 C455 270 405 315 365 285 L210 245 C130 225 90 155 145 95 Z"/>
-    <path className="belt-track belt-highlight" d="M145 95 C190 35 295 35 335 95 L430 230 C455 270 405 315 365 285 L210 245 C130 225 90 155 145 95 Z"/>
-  </svg>
-  <span className="pulley pulley-large"/><span className="pulley pulley-upper"/><span className="pulley pulley-small"/><span className="pulley pulley-tensioner"/>
-  <span className="belt-caption">ENGINE DRIVE SYSTEM</span>
-</div><div className="feature-stamp"><Gauge size={23}/><span>CARE IN<br/>EVERY DETAIL</span></div></div><div className="feature-copy" data-reveal><span className="eyebrow">MORE THAN A GARAGE</span><h2>Good service is<br/><em>built on trust.</em></h2><p>We believe looking after your vehicle should feel simple. Understand the work, review the quotation and stay informed as your service or parts request moves forward.</p><div className="feature-points"><span><ShieldCheck/> Transparent quotations</span><span><Settings2/> Practical automotive solutions</span><span><Heart/> Care that goes the extra mile</span></div><Link className="text-link" href="/enquire">Talk to our team <ArrowRight size={16}/></Link></div></div></section>
+      <section className="service-story" id="care">
+        <div className="container">
+          <div className="service-story-heading" data-reveal>
+            <span className="eyebrow">THE CARE IN EVERY DETAIL</span>
+            <h2>Precision in every step.<br/><em>Confidence in every drive.</em></h2>
+            <p>See what thoughtful maintenance looks like. We give every essential service the attention it deserves — from the fluids that protect your engine and gearbox to the filters that keep your vehicle breathing clean.</p>
+          </div>
+          <div className="service-sequence" aria-label="Three stages of a vehicle service">
+            <article className="service-scene oil-scene" data-reveal>
+              <div className="scene-top"><span>01 / ENGINE OIL</span><Droplet size={18}/></div>
+              <div className="scene-art oil-art" aria-hidden="true">
+                <div className="oil-engine"><span className="oil-cap"/></div>
+                <div className="oil-pan"><i/><i/><i/></div>
+                <span className="oil-stream"/><span className="oil-drop drop-one"/><span className="oil-drop drop-two"/>
+                <div className="oil-bottle"><b>OIL</b><small>5W–30</small></div>
+              </div>
+              <div className="scene-copy"><h3>Fresh oil. Smoother performance.</h3><p>Drain the old oil, replace it with the correct grade and renew the oil filter to help protect vital engine components.</p><span className="scene-status"><CheckCircle2 size={14}/> DRAIN · REFILL · CHECK</span></div>
+            </article>
+            <article className="service-scene gear-scene" data-reveal>
+              <div className="scene-top"><span>02 / GEAR FLUID</span><Cog size={18}/></div>
+              <div className="scene-art gear-art" aria-hidden="true">
+                <div className="gear-housing"><div className="gear-wheel"><i/><i/><i/><i/><i/><i/></div><div className="gear-core"/></div>
+                <span className="gear-fluid fluid-one"/><span className="gear-fluid fluid-two"/>
+                <div className="fluid-can"><b>ATF</b><small>GEAR FLUID</small></div>
+                <span className="gear-flow"/>
+              </div>
+              <div className="scene-copy"><h3>Gear changes with confidence.</h3><p>Inspect the transmission system, drain fluid where required and refill with the manufacturer-recommended specification.</p><span className="scene-status"><CheckCircle2 size={14}/> INSPECT · DRAIN · REFILL</span></div>
+            </article>
+            <article className="service-scene filter-scene" data-reveal>
+              <div className="scene-top"><span>03 / FILTERS</span><Filter size={18}/></div>
+              <div className="scene-art filter-art" aria-hidden="true">
+                <div className="filter-old"><span/><i/><i/><i/><i/><i/><i/><i/></div>
+                <div className="filter-new"><span/><i/><i/><i/><i/><i/><i/><i/></div>
+                <span className="filter-arrow">↻</span>
+                <div className="filter-label">CLEAN AIR<br/>CLEAN FLOW</div>
+              </div>
+              <div className="scene-copy"><h3>Clean filters. Better breathing.</h3><p>Check the oil, air and cabin filters, then replace worn or clogged elements to support clean airflow and protection.</p><span className="scene-status"><CheckCircle2 size={14}/> CHECK · REPLACE · VERIFY</span></div>
+            </article>
+          </div>
+          <div className="service-story-foot"><span><i/> A closer look at routine vehicle care</span><Link className="text-link" href="/enquire">Book a service <ArrowRight size={16}/></Link></div>
+        </div>
+      </section>
 
       <section className="process" id="how"><div className="container process-inner"><div data-reveal><span className="eyebrow">A BETTER WAY TO GET IT DONE</span><h2>Simple from the<br/><em>first hello.</em></h2><p>One clear process, with you in control at every step.</p></div><div className="steps">{[["01","Tell us what you need","Share your vehicle details, service request or part reference."],["02","Review your quotation","We confirm the scope, availability, pricing and timing."],["03","Approve and track","Proceed with the work or sourcing and stay informed."]].map(([n,t,d])=><div data-reveal key={n}><b>{n}</b><span><strong>{t}</strong><small>{d}</small></span></div>)}</div></div></section>
 
