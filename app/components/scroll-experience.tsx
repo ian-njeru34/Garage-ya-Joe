@@ -29,7 +29,7 @@ export default function ScrollExperience({ children }: { children: ReactNode }) 
 
       if (atBottom && !waitingAtBottom) {
         waitingAtBottom = true;
-        // Begin the full ten-second pause only once the real page bottom is reached.
+        // Begin the full six-second pause only once the real page bottom is reached.
         returnTimer = setTimeout(() => {
           const stillAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 3;
           if (stillAtBottom) {
@@ -38,7 +38,7 @@ export default function ScrollExperience({ children }: { children: ReactNode }) 
           } else {
             waitingAtBottom = false;
           }
-        }, 10000);
+        }, 6000);
       } else if (!atBottom && waitingAtBottom) {
         if (returnTimer) clearTimeout(returnTimer);
         returnTimer = undefined;
