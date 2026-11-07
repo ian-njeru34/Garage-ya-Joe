@@ -7,13 +7,14 @@ import GarageLogo from "../components/garage-logo";
 import {
   LayoutDashboard, Wrench, Users, Package, Warehouse, Ship,
   FileText, ShoppingCart, Wallet, UserCog, Settings, LogOut,
-  Menu, ShieldCheck, ArrowUpRight
+  Menu, ShieldCheck, ArrowUpRight, MessageCircle
 } from "lucide-react";
 
 const sections = [
   { label: "Overview", href: "/owner", icon: LayoutDashboard, description: "Business activity and key updates" },
   { label: "Garage", href: "/owner/garage", icon: Wrench, description: "Appointments, inspections and job cards" },
   { label: "Customers", href: "/owner/customers", icon: Users, description: "Customer accounts and service history" },
+  { label: "Enquiries", href: "/owner/enquiries", icon: MessageCircle, description: "Customer requests and WhatsApp follow-up" },
   { label: "Auto Spares", href: "/owner/spares", icon: Package, description: "Parts catalogue and sales enquiries" },
   { label: "Inventory", href: "/owner/inventory", icon: Warehouse, description: "Stock levels, receipts and transfers" },
   { label: "Importation", href: "/owner/importation", icon: Ship, description: "Special orders and imported parts" },
