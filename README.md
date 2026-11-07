@@ -1,4 +1,4 @@
-# Garage ya Joe
+# The Garage
 
 Integrated garage services, auto-spares sales and special-order importation platform.
 
