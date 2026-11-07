@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, ChevronUp, MapPin, Phone } from "lucide-react";
+import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Heart, Gauge, Settings2, MapPin, Phone } from "lucide-react";
 import ScrollExperience from "./components/scroll-experience";
+import BackToTop from "./components/back-to-top";
 
 const services = [
   { icon: Wrench, title: "Vehicle servicing", text: "Routine maintenance, diagnostics and scheduled servicing." },
@@ -49,7 +50,7 @@ export default function HomePage() {
       <section className="contact" id="contact"><div className="container contact-box" data-reveal><div><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p></div><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Contact details can be managed from business settings.</small></div></div></section>
 
       <footer><div className="container footer"><div className="footer-brand"><span className="brand-mark">J<span>.</span></span><b>GARAGE YA JOE</b></div><span>© {new Date().getFullYear()} Garage ya Joe. All rights reserved.</span><span>Garage · Auto spares · Imports</span><a href="#top">Back to top ↑</a></div></footer>
-      <button className="back-top" aria-label="Back to top" onClick={() => window.scrollTo({top:0,behavior:"smooth"})}><ChevronUp size={20}/></button>
+      <BackToTop />
     </main>
   </ScrollExperience>;
 }
