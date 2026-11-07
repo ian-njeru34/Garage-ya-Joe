@@ -133,7 +133,7 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === "dealer_list" || action === "dealer_respond") {
-      const token = request.headers.get("Authorization")?.replace(/^Bearer\\s+/i, "");
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!token) return json({ error: "Sign in as a dealer first." }, 401);
       const { data: authData, error: authError } = await admin.auth.getUser(token);
       if (authError || !authData.user) return json({ error: "Your dealer session is invalid." }, 401);
@@ -187,7 +187,7 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === "owner_publish_spare_quote") {
-      const token = request.headers.get("Authorization")?.replace(/^Bearer\\s+/i, "");
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!token) return json({ error: "Sign in as the owner first." }, 401);
       const { data: authData, error: authError } = await admin.auth.getUser(token);
       if (authError || !authData.user) return json({ error: "Your session is invalid." }, 401);
