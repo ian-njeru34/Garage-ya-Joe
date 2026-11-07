@@ -132,6 +132,110 @@ Deno.serve(async (request: Request) => {
       return json({ ok: true, user: { id: userId, email, fullName, role } });
     }
 
+    if (action === "dealer_list" || action === "dealer_respond") {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\\s+/i, "");
+      if (!token) return json({ error: "Sign in as a dealer first." }, 401);
+      const { data: authData, error: authError } = await admin.auth.getUser(token);
+      if (authError || !authData.user) return json({ error: "Your dealer session is invalid." }, 401);
+      const dealerUser = authData.user;
+      const { data: dealer, error: dealerError } = await admin
+        .from("dealer_accounts").select("business_id,supplier_id")
+        .eq("profile_id", dealerUser.id).maybeSingle();
+      if (dealerError || !dealer) return json({ error: "Dealer account not found." }, 403);
+
+      if (action === "dealer_list") {
+        const { data: requests, error } = await admin.from("spare_requests")
+          .select("id,part_name,part_number,vehicle_make,vehicle_model,vehicle_year,quantity,customer_notes,status,created_at")
+          .eq("business_id", dealer.business_id)
+          .eq("assigned_dealer_id", dealerUser.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return json({ ok: true, requests: requests ?? [] });
+      }
+
+      const requestId = clean(body.requestId, 80);
+      const availability = clean(body.availability, 20);
+      const price = body.price === "" || body.price == null ? null : Number(body.price);
+      const shipping = body.shipping === "" || body.shipping == null ? 0 : Number(body.shipping);
+      const days = body.estimatedDays === "" || body.estimatedDays == null ? null : Number(body.estimatedDays);
+      if (!requestId || !["available", "to_order", "unavailable"].includes(availability)) {
+        return json({ error: "Provide a valid request and availability." }, 400);
+      }
+      if ((price !== null && (!Number.isFinite(price) || price < 0)) ||
+          !Number.isFinite(shipping) || shipping < 0 ||
+          (days !== null && (!Number.isInteger(days) || days < 0))) {
+        return json({ error: "Enter valid prices, shipping and delivery days." }, 400);
+      }
+      const { data: assignedRequest, error: requestError } = await admin.from("spare_requests")
+        .select("id,business_id").eq("id", requestId)
+        .eq("business_id", dealer.business_id)
+        .eq("assigned_dealer_id", dealerUser.id).maybeSingle();
+      if (requestError || !assignedRequest) return json({ error: "This request is not assigned to your dealer account." }, 403);
+
+      const { error: responseError } = await admin.from("spare_request_responses").insert({
+        business_id: dealer.business_id, spare_request_id: requestId,
+        dealer_profile_id: dealerUser.id, availability,
+        quoted_unit_price: price, currency_code: "KES",
+        estimated_days: days, estimated_shipping_kes: shipping,
+        response_notes: clean(body.notes, 1000) || null,
+      });
+      if (responseError) throw responseError;
+      const { error: updateError } = await admin.from("spare_requests")
+        .update({ status: "dealer_responded", updated_at: new Date().toISOString() })
+        .eq("id", requestId).eq("business_id", dealer.business_id)
+        .eq("assigned_dealer_id", dealerUser.id);
+      if (updateError) throw updateError;
+      return json({ ok: true, message: "Your quote has been sent to The Garage owner." });
+    }
+
+    if (action === "owner_publish_spare_quote") {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\\s+/i, "");
+      if (!token) return json({ error: "Sign in as the owner first." }, 401);
+      const { data: authData, error: authError } = await admin.auth.getUser(token);
+      if (authError || !authData.user) return json({ error: "Your session is invalid." }, 401);
+      const owner = authData.user;
+      const requestId = clean(body.requestId, 80);
+      const responseId = clean(body.responseId, 80);
+      const markupPercent = Number(body.markupPercent);
+      const markupFixed = Number(body.markupFixed);
+      if (!requestId || !responseId || !Number.isFinite(markupPercent) || markupPercent < 0 ||
+          !Number.isFinite(markupFixed) || markupFixed < 0) {
+        return json({ error: "Enter a valid dealer quote and non-negative markup." }, 400);
+      }
+      const { data: ownerRole } = await admin.from("user_roles")
+        .select("business_id").eq("user_id", owner.id).eq("role_code", "owner").limit(1).maybeSingle();
+      if (!ownerRole) return json({ error: "Owner permission required." }, 403);
+      const { data: spare, error: spareError } = await admin.from("spare_requests")
+        .select("id,business_id,quantity,assigned_dealer_id")
+        .eq("id", requestId).eq("business_id", ownerRole.business_id).maybeSingle();
+      if (spareError || !spare) return json({ error: "Spare request not found." }, 404);
+      const { data: dealerResponse, error: quoteError } = await admin.from("spare_request_responses")
+        .select("id,quoted_unit_price,estimated_shipping_kes,availability,spare_request_id")
+        .eq("id", responseId).eq("business_id", ownerRole.business_id)
+        .eq("spare_request_id", requestId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (quoteError || !dealerResponse) return json({ error: "Dealer response not found for this request." }, 404);
+      if (dealerResponse.availability === "unavailable" || dealerResponse.quoted_unit_price == null) {
+        return json({ error: "This dealer response does not contain an available priced offer." }, 400);
+      }
+      const dealerUnit = Number(dealerResponse.quoted_unit_price);
+      const customerUnit = Math.round((dealerUnit * (1 + markupPercent / 100) + markupFixed) * 100) / 100;
+      const shipping = Number(dealerResponse.estimated_shipping_kes || 0);
+      const total = Math.round((customerUnit * Number(spare.quantity) + shipping) * 100) / 100;
+      const { error: saveError } = await admin.from("spare_requests").update({
+        owner_markup_percent: markupPercent,
+        owner_markup_fixed_kes: markupFixed,
+        customer_unit_price_kes: customerUnit,
+        customer_shipping_kes: shipping,
+        customer_total_kes: total,
+        customer_quote_published_at: new Date().toISOString(),
+        owner_price_updated_by: owner.id,
+        status: "quoted",
+        updated_at: new Date().toISOString(),
+      }).eq("id", requestId).eq("business_id", ownerRole.business_id);
+      if (saveError) throw saveError;
+      return json({ ok: true, customerUnit, shipping, total });
+    }
+
     if (action === "public_request") {
       // Honeypot field for simple automated form submissions.
       if (clean(body.website, 200)) return json({ ok: true });
