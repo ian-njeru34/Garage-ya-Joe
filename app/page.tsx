@@ -48,38 +48,33 @@ export default function HomePage() {
           <div className="service-story-heading" data-reveal>
             <span className="eyebrow">THE CARE IN EVERY DETAIL</span>
             <h2>Precision in every step.<br/><em>Confidence in every drive.</em></h2>
-            <p>See what thoughtful maintenance looks like. We give every essential service the attention it deserves — from the fluids that protect your engine and gearbox to the filters that keep your vehicle breathing clean.</p>
+            <p>Real maintenance is hands-on. Follow the mechanic through an engine-oil change, transmission service and air-filter replacement — using the right equipment and correct service procedure for each vehicle.</p>
           </div>
           <div className="service-sequence" aria-label="Three stages of a vehicle service">
             <article className="service-scene oil-scene" data-reveal>
               <div className="scene-top"><span>01 / ENGINE OIL</span><Droplet size={18}/></div>
-              <div className="scene-art oil-art" aria-hidden="true">
-                <div className="oil-engine"><span className="oil-cap"/></div>
-                <div className="oil-pan"><i/><i/><i/></div>
-                <span className="oil-stream"/><span className="oil-drop drop-one"/><span className="oil-drop drop-two"/>
-                <div className="oil-bottle"><b>OIL</b><small>5W–30</small></div>
+              <div className="scene-art photo-art oil-photo" role="img" aria-label="Mechanic draining used engine oil beneath a raised vehicle, followed by fresh oil being poured into the engine">
+                <div className="service-photo oil-drain-photo"/>
+                <div className="service-photo oil-refill-photo"/>
+                <span className="photo-caption">DRAIN OLD OIL <i/> REFILL TO SPEC</span>
               </div>
-              <div className="scene-copy"><h3>Fresh oil. Smoother performance.</h3><p>Drain the old oil, replace it with the correct grade and renew the oil filter to help protect vital engine components.</p><span className="scene-status"><CheckCircle2 size={14}/> DRAIN · REFILL · CHECK</span></div>
+              <div className="scene-copy"><h3>Fresh oil. Smoother performance.</h3><p>The vehicle is raised safely, used oil is collected from the sump, the oil filter is renewed and fresh oil is added to the manufacturer’s specification.</p><span className="scene-status"><CheckCircle2 size={14}/> DRAIN · REFILL · CHECK</span></div>
             </article>
             <article className="service-scene gear-scene" data-reveal>
               <div className="scene-top"><span>02 / GEAR FLUID</span><Cog size={18}/></div>
-              <div className="scene-art gear-art" aria-hidden="true">
-                <div className="gear-housing"><div className="gear-wheel"><i/><i/><i/><i/><i/><i/></div><div className="gear-core"/></div>
-                <span className="gear-fluid fluid-one"/><span className="gear-fluid fluid-two"/>
-                <div className="fluid-can"><b>ATF</b><small>GEAR FLUID</small></div>
-                <span className="gear-flow"/>
+              <div className="scene-art photo-art gear-photo" role="img" aria-label="Mechanic servicing a vehicle transmission on a hydraulic lift using transmission-fluid equipment">
+                <div className="service-photo transmission-photo"/>
+                <span className="photo-caption">TRANSMISSION SERVICE <i/> CORRECT FLUID</span>
               </div>
-              <div className="scene-copy"><h3>Gear changes with confidence.</h3><p>Inspect the transmission system, drain fluid where required and refill with the manufacturer-recommended specification.</p><span className="scene-status"><CheckCircle2 size={14}/> INSPECT · DRAIN · REFILL</span></div>
+              <div className="scene-copy"><h3>Gear changes with confidence.</h3><p>The mechanic accesses the transmission on a lift, checks the system and services the fluid using the correct procedure and specification for that gearbox.</p><span className="scene-status"><CheckCircle2 size={14}/> INSPECT · DRAIN · REFILL</span></div>
             </article>
             <article className="service-scene filter-scene" data-reveal>
               <div className="scene-top"><span>03 / FILTERS</span><Filter size={18}/></div>
-              <div className="scene-art filter-art" aria-hidden="true">
-                <div className="filter-old"><span/><i/><i/><i/><i/><i/><i/><i/></div>
-                <div className="filter-new"><span/><i/><i/><i/><i/><i/><i/><i/></div>
-                <span className="filter-arrow">↻</span>
-                <div className="filter-label">CLEAN AIR<br/>CLEAN FLOW</div>
+              <div className="scene-art photo-art filter-photo" role="img" aria-label="Mechanic removing a dirty engine air filter and fitting a clean replacement">
+                <div className="service-photo air-filter-photo"/>
+                <span className="photo-caption">REMOVE WORN FILTER <i/> FIT CLEAN FILTER</span>
               </div>
-              <div className="scene-copy"><h3>Clean filters. Better breathing.</h3><p>Check the oil, air and cabin filters, then replace worn or clogged elements to support clean airflow and protection.</p><span className="scene-status"><CheckCircle2 size={14}/> CHECK · REPLACE · VERIFY</span></div>
+              <div className="scene-copy"><h3>Clean filters. Better breathing.</h3><p>The air-box is opened, the dirty pleated element is removed, the housing is checked and a correctly fitted clean filter is installed.</p><span className="scene-status"><CheckCircle2 size={14}/> CHECK · REPLACE · VERIFY</span></div>
             </article>
           </div>
           <div className="service-story-foot"><span><i/> A closer look at routine vehicle care</span><Link className="text-link" href="/enquire">Book a service <ArrowRight size={16}/></Link></div>
