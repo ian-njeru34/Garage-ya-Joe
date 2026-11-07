@@ -1,3 +1,4 @@
+import SiteFooter from "./components/site-footer";
 import Link from "next/link";
 import { ArrowRight, Wrench, CarFront, PackageSearch, Ship, ShieldCheck, Clock3, Search, Gauge, Settings2, MapPin, Phone, Droplet, Filter, Cog, CheckCircle2 } from "lucide-react";
 import ScrollExperience from "./components/scroll-experience";
@@ -47,7 +48,7 @@ export default function HomePage() {
 
       <section className="contact" id="contact"><div className="container contact-box" data-reveal><div><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p></div><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Contact details can be managed from business settings.</small></div></div></section>
 
-      <footer><div className="container footer"><div className="footer-brand"><GarageLogo /><b>THE GARAGE</b></div><span>© {new Date().getFullYear()} The Garage. All rights reserved.</span><span>Garage · Auto spares · Imports</span><a href="#top">Back to top ↑</a><a className="site-credit" href="https://digitalink.co.ke/" target="_blank" rel="noopener noreferrer">Site by <span>Digital Ink</span></a></div></footer>
+      <SiteFooter />
       <BackToTop />
     </main>
   </ScrollExperience>;
