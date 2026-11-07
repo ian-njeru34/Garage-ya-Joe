@@ -1,97 +1,36 @@
 "use client";
-
-import { FormEvent, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import {FormEvent,useCallback,useEffect,useState} from "react";
+import {createClient,User} from "@supabase/supabase-js";
+import {useRouter} from "next/navigation";
 import GarageLogo from "../components/garage-logo";
-
-export default function CustomerSignInPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setMessage("");
-    setError("");
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (!url || !key) throw new Error("Sign-in is temporarily unavailable. Please contact the administrator.");
-      const supabase = createClient(url, key);
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (signInError) throw signInError;
-      if (!data.user) throw new Error("We could not verify your account. Please sign in again.");
-
-      const { data: roles, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role_code,business_id,location_id")
-        .eq("user_id", data.user.id);
-
-      if (roleError) {
-        await supabase.auth.signOut();
-        throw new Error("We signed you in but could not verify your account permissions. Please contact the administrator.");
-      }
-
-      if (roles?.some((role) => role.role_code === "owner")) {
-        router.replace("/owner");
-        router.refresh();
-        return;
-      }
-
-      setMessage("You are signed in. Your customer dashboard is not yet available; please contact the garage for assistance.");
-      setPassword("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "We could not sign you in. Check your details and try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <main className="signin-shell">
-      <section className="signin-card">
-        <a className="brand" href="/" aria-label="The Garage home"><GarageLogo /><span>THE GARAGE</span></a>
-        <span className="eyebrow">CUSTOMER ACCOUNT</span>
-        <h1>Sign in</h1>
-        <p className="intro">Sign in to your The Garage account.</p>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">Email address</label>
-          <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          {error ? <div className="alert" role="alert">{error}</div> : null}
-          {message ? <div className="success" role="status">{message}</div> : null}
-          <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
-        </form>
-        <a className="forgot" href="/auth/forgot-password">Forgot your password?</a>
-        <a className="back" href="/">Back to The Garage</a>
-      </section>
-      <style jsx>{`
-        .signin-shell{min-height:100vh;background:#f5f6f1;display:grid;place-items:center;padding:32px 16px;color:#17231f;font-family:Arial,sans-serif}
-        .signin-card{width:min(100%,460px);background:#fff;border:1px solid #e3e8df;border-radius:10px;padding:40px;box-shadow:0 18px 55px #142d2110}
-        .brand{display:flex;align-items:center;gap:12px;color:#1e493b;font-weight:800;letter-spacing:.12em;font-size:17px;margin-bottom:42px}.brand :global(.brand-mark){width:58px;height:46px}
-        .eyebrow{display:block;color:#71816f;font-size:10px;font-weight:700;letter-spacing:.16em}
-        h1{font-size:30px;letter-spacing:-.04em;margin:12px 0}
-        .intro{color:#66736d;font-size:14px;line-height:1.7}
-        form{display:grid;gap:11px;margin-top:25px}
-        label{font-size:12px;font-weight:700;margin-top:7px}
-        input{width:100%;padding:13px;border:1px solid #d9e0d8;border-radius:5px;font-size:15px;outline-color:#638044}
-        button{margin-top:12px;border:0;border-radius:5px;background:#1e493b;color:#fff;padding:14px;font-weight:700;font-size:13px;cursor:pointer}
-        button:disabled{opacity:.6;cursor:wait}
-        .alert,.success{padding:13px;border-radius:5px;font-size:13px;line-height:1.6;margin-top:10px}
-        .alert{background:#fff0ee;color:#9b3026}.success{background:#eef6e8;color:#31552b}
-        .forgot,.back{display:block;margin-top:22px;color:#526d40;font-size:12px;font-weight:700}
-        .back{margin-top:14px;color:#66736d}
-        @media(max-width:480px){.signin-card{padding:28px 22px}}
-      `}</style>
-    </main>
-  );
+import {CarFront,ClipboardList,Package,LogOut,Plus,Wrench} from "lucide-react";
+type Snapshot={customer?:{display_name:string;email:string;whatsapp:string};vehicles?:any[];appointments?:any[];jobs?:any[];quotations?:any[];spare_requests?:any[]};
+const db=()=>{const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;if(!u||!k)throw Error("Account service is not configured.");return createClient(u,k)};
+const label=(s:string)=>String(s||"").replaceAll("_"," ").replace(/\b\w/g,x=>x.toUpperCase());
+const cash=(n:number,c="KES")=>new Intl.NumberFormat("en-KE",{style:"currency",currency:c}).format(n||0);
+export default function CustomerPage(){
+ const router=useRouter();const[user,setUser]=useState<User|null>(null);const[data,setData]=useState<Snapshot|null>(null);
+ const[mode,setMode]=useState<"signin"|"signup">("signin");const[email,setEmail]=useState("");const[password,setPassword]=useState("");const[name,setName]=useState("");const[wa,setWa]=useState("");
+ const[tab,setTab]=useState("overview");const[busy,setBusy]=useState(false);const[error,setError]=useState("");const[message,setMessage]=useState("");
+ const[reg,setReg]=useState("");const[make,setMake]=useState("");const[model,setModel]=useState("");const[year,setYear]=useState("");
+ const[vehicleId,setVehicleId]=useState("");const[service,setService]=useState("");const[concern,setConcern]=useState("");const[preferred,setPreferred]=useState("");
+ const[part,setPart]=useState("");const[partNo,setPartNo]=useState("");const[partMake,setPartMake]=useState("");const[partModel,setPartModel]=useState("");const[qty,setQty]=useState("1");const[partNotes,setPartNotes]=useState("");
+ const load=useCallback(async()=>{const{data,error}=await db().rpc("customer_portal_snapshot");if(error)throw error;setData(data as Snapshot)},[]);
+ useEffect(()=>{let ok=true;try{db().auth.getUser().then(async({data})=>{if(!ok||!data.user)return;setUser(data.user);try{await load()}catch(e){if(ok)setError(e instanceof Error?e.message:"Unable to load account")}})}catch(e){setError(e instanceof Error?e.message:"Account service unavailable")}return()=>{ok=false}},[load]);
+ async function auth(e:FormEvent){e.preventDefault();setBusy(true);setError("");setMessage("");try{const s=db();if(mode==="signup"){const{data,error}=await s.auth.signUp({email:email.trim(),password,options:{data:{account_type:"customer",full_name:name.trim(),whatsapp_number:wa.trim()}}});if(error)throw error;if(data.session){setUser(data.user);await load();setMessage("Your customer account is active.")}else setMessage("Registration received. If Supabase email confirmation is enabled, confirm your email before signing in. No manual garage approval is needed.")}else{const{data,error}=await s.auth.signInWithPassword({email:email.trim(),password});if(error)throw error;setUser(data.user);await load()}}catch(e){setError(e instanceof Error?e.message:"Could not complete sign in")}finally{setBusy(false)}}
+ async function run(fn:string,args:any,msg:string){setBusy(true);setError("");setMessage("");try{const{error}=await db().rpc(fn,args);if(error)throw error;await load();setMessage(msg)}catch(e){setError(e instanceof Error?e.message:"Request failed")}finally{setBusy(false)}}
+ async function logout(){await db().auth.signOut();setUser(null);setData(null);router.refresh()}
+ if(!user)return <main className="auth"><section className="card"><a className="brand" href="/"><GarageLogo/><b>THE GARAGE</b></a><small>CUSTOMER PORTAL</small><h1>{mode==="signup"?"Create your account":"Welcome back"}</h1><p>Book services, track repairs and approve quotations online.</p><div className="tabs"><button className={mode==="signin"?"on":""} onClick={()=>setMode("signin")}>Sign in</button><button className={mode==="signup"?"on":""} onClick={()=>setMode("signup")}>Create account</button></div><form onSubmit={auth}>{mode==="signup"?<><label>Full name<input required value={name} onChange={e=>setName(e.target.value)}/></label><label>WhatsApp number<input required type="tel" placeholder="+254…" value={wa} onChange={e=>setWa(e.target.value)}/></label></>:null}<label>Email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)}/></label><label>Password<input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>{error?<p className="error">{error}</p>:null}{message?<p className="success">{message}</p>:null}<button className="primary" disabled={busy}>{busy?"Please wait…":mode==="signup"?"Create account":"Sign in"}</button></form><a href="/auth/forgot-password">Forgot password?</a><style jsx>{authCss}</style></section></main>;
+ const vehicles=data?.vehicles||[],jobs=data?.jobs||[],quotes=data?.quotations||[],spares=data?.spare_requests||[];
+ return <main className="portal"><aside><a className="brand" href="/"><GarageLogo/><span>THE GARAGE<small>CUSTOMER PORTAL</small></span></a><nav>{[["overview","Overview"],["vehicles","My vehicles"],["service","Book service"],["quotations","Bills & approvals"],["spares","Spares"]].map(([id,t])=><button className={tab===id?"on":""} key={id} onClick={()=>setTab(id)}>{t}</button>)}</nav><button className="logout" onClick={logout}><LogOut size={15}/> Sign out</button></aside><section className="main"><header>Customer workspace <b>{data?.customer?.display_name||user.email}</b></header><div className="content"><small>YOUR GARAGE, IN ONE PLACE</small><h1>Hello, {(data?.customer?.display_name||"there").split(" ")[0]}</h1><p>Follow your vehicle's service progress and manage approvals.</p>{error?<p className="error">{error}</p>:null}{message?<p className="success">{message}</p>:null}
+ {tab==="overview"?<><div className="stats"><div><CarFront/><b>{vehicles.length}</b><small>Vehicles</small></div><div><Wrench/><b>{jobs.length}</b><small>Service jobs</small></div><div><ClipboardList/><b>{quotes.filter(q=>q.status==="sent").length}</b><small>Awaiting approval</small></div><div><Package/><b>{spares.length}</b><small>Spares requests</small></div></div><section className="panel"><h2>Service progress</h2>{jobs.length?jobs.map(j=><article key={j.id}><b>{j.job_number} · {j.vehicle}</b><span>{label(j.status)}</span>{j.diagnosis?<p>{j.diagnosis}</p>:null}{(j.tasks||[]).map((t:any,i:number)=><small key={i}>{t.title} — {label(t.status)}</small>)}</article>):<p>No active service jobs yet.</p>}</section><section className="panel"><h2>Waiting for your approval</h2>{quotes.filter(q=>q.status==="sent").map(q=><article key={q.id}><b>{q.number}</b><strong>{cash(q.total,q.currency)}</strong><p>{q.items?.map((i:any)=>i.description).join(" · ")}</p><button disabled={busy} onClick={()=>run("customer_respond_to_quotation",{p_quotation_id:q.id,p_accept:true,p_reason:null},"Service approved.")}>Approve service</button><button className="secondary" disabled={busy} onClick={()=>run("customer_respond_to_quotation",{p_quotation_id:q.id,p_accept:false,p_reason:"Customer declined"},"Quotation declined.")}>Decline</button></article>)}{!quotes.some(q=>q.status==="sent")?<p>No quotations await your decision.</p>:null}</section></>:null}
+ {tab==="vehicles"?<section className="panel"><h2>My vehicles</h2><form className="formgrid" onSubmit={e=>{e.preventDefault();void run("customer_add_vehicle",{p_registration_number:reg,p_make:make,p_model:model,p_year:year?Number(year):null},"Vehicle added.");setReg("");setMake("");setModel("");setYear("")}}><input required placeholder="Registration number" value={reg} onChange={e=>setReg(e.target.value)}/><input required placeholder="Make" value={make} onChange={e=>setMake(e.target.value)}/><input required placeholder="Model" value={model} onChange={e=>setModel(e.target.value)}/><input type="number" placeholder="Year" value={year} onChange={e=>setYear(e.target.value)}/><button className="primary" disabled={busy}><Plus size={14}/> Add vehicle</button></form>{vehicles.map(v=><article key={v.id}><b>{v.registration_number}</b><span>{v.make} {v.model} {v.year||""}</span></article>)}</section>:null}
+ {tab==="service"?<section className="panel"><h2>Book a service</h2>{vehicles.length===0?<p>Add a vehicle before booking.</p>:<form className="stack" onSubmit={e=>{e.preventDefault();void run("customer_request_service",{p_vehicle_id:vehicleId,p_requested_service:service,p_customer_concern:concern||null,p_preferred_at:preferred?new Date(preferred).toISOString():null},"Booking request sent.");setService("");setConcern("");setPreferred("")}}><label>Vehicle<select required value={vehicleId} onChange={e=>setVehicleId(e.target.value)}><option value="">Choose vehicle</option>{vehicles.map(v=><option key={v.id} value={v.id}>{v.registration_number} · {v.make} {v.model}</option>)}</select></label><label>Service required<input required value={service} onChange={e=>setService(e.target.value)} placeholder="e.g. Full service or brake repair"/></label><label>Concern<textarea value={concern} onChange={e=>setConcern(e.target.value)}/></label><label>Preferred date<input type="datetime-local" value={preferred} onChange={e=>setPreferred(e.target.value)}/></label><button className="primary" disabled={busy}>Request booking</button></form>}</section>:null}
+ {tab==="quotations"?<section className="panel"><h2>Bills and approvals</h2>{quotes.map(q=><article key={q.id}><b>{q.number}</b><strong>{cash(q.total,q.currency)}</strong><span>{label(q.status)}</span><ul>{q.items?.map((i:any,n:number)=><li key={n}>{i.description} × {i.quantity}: {cash(i.line_total,q.currency)}</li>)}</ul>{q.status==="sent"?<><button disabled={busy} onClick={()=>run("customer_respond_to_quotation",{p_quotation_id:q.id,p_accept:true,p_reason:null},"Service approved.")}>Approve</button><button className="secondary" disabled={busy} onClick={()=>run("customer_respond_to_quotation",{p_quotation_id:q.id,p_accept:false,p_reason:"Customer declined"},"Quotation declined.")}>Decline</button></>:null}</article>)}{!quotes.length?<p>No bills yet.</p>:null}</section>:null}
+ {tab==="spares"?<section className="panel"><h2>Request spare parts</h2><form className="stack" onSubmit={e=>{e.preventDefault();void run("customer_request_spare",{p_part_name:part,p_whatsapp:data?.customer?.whatsapp||"",p_part_number:partNo||null,p_vehicle_make:partMake||null,p_vehicle_model:partModel||null,p_vehicle_year:null,p_quantity:Number(qty),p_notes:partNotes||null},"Spares request submitted.");setPart("");setPartNo("");setPartNotes("")}}><label>Part required<input required value={part} onChange={e=>setPart(e.target.value)}/></label><label>Part number (optional)<input value={partNo} onChange={e=>setPartNo(e.target.value)}/></label><div className="formgrid"><input placeholder="Vehicle make" value={partMake} onChange={e=>setPartMake(e.target.value)}/><input placeholder="Vehicle model" value={partModel} onChange={e=>setPartModel(e.target.value)}/><input type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)}/></div><label>Additional details<textarea value={partNotes} onChange={e=>setPartNotes(e.target.value)}/></label><button className="primary" disabled={busy||!data?.customer?.whatsapp}>Send request</button>{!data?.customer?.whatsapp?<small>Please add a WhatsApp number to your account profile.</small>:null}</form>{spares.map(s=><article key={s.id}><b>{s.part_name}</b><span>{label(s.status)}</span></article>)}</section>:null}
+ </div></section><style jsx>{portalCss}</style></main>
 }
+const authCss=`.auth{min-height:100vh;background:#f4f6f1;display:grid;place-items:center;padding:22px;font-family:Arial;color:#17231f}.card{width:min(100%,440px);background:white;padding:36px;border:1px solid #e2e8df;border-radius:8px}.brand{display:flex;align-items:center;gap:10px;color:#214b3b;letter-spacing:.12em;margin-bottom:35px}.brand :global(.brand-mark){width:52px}.card h1{font-size:30px;margin:10px 0}.card p{font-size:13px;color:#718075;line-height:1.7}.card small{font-size:9px;letter-spacing:.15em;color:#7b8b7e}.tabs{display:flex;background:#f0f3ed;margin:22px 0;padding:4px}.tabs button{flex:1;padding:10px;border:0;background:none;font-size:11px}.tabs button.on{background:white;color:#234b3a}.card form,.stack{display:grid;gap:12px}.card label,.stack label{display:grid;gap:7px;font-size:11px;font-weight:bold}.card input,.stack input,.stack select,.stack textarea,.formgrid input{width:100%;padding:12px;border:1px solid #d9e1d7;border-radius:4px;font:13px Arial}.primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#1e493b;color:white;border:0;padding:12px 16px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer}.secondary{background:#edf1e9!important;color:#45584a!important}.card>a:last-child{display:block;margin-top:18px;font-size:11px;color:#557449}.error,.success{padding:11px;border-radius:4px;font-size:12px}.error{background:#fff0ed;color:#9b3026}.success{background:#edf5e9;color:#315c32}`;
+const portalCss=`.portal{min-height:100vh;background:#f5f6f1;color:#17231f;font-family:Arial;display:grid;grid-template-columns:225px 1fr}.portal aside{background:#17382e;color:white;padding:22px 14px;display:flex;flex-direction:column;min-height:100vh}.portal aside .brand{display:flex;align-items:center;gap:9px;color:white;font-size:12px;font-weight:bold;padding:0 5px 30px}.brand :global(.brand-mark){width:42px}.brand small{display:block;color:#a9bcb0;font-size:8px;margin-top:4px}.portal nav{display:grid;gap:5px}.portal nav button,.logout{border:0;background:transparent;text-align:left;color:#c4d1c8;padding:12px;border-radius:4px;font-size:11px;cursor:pointer}.portal nav button.on{background:#2a5141;color:white}.logout{margin-top:auto;border-top:1px solid #ffffff25;display:flex;gap:8px;align-items:center}.main{min-width:0}.main header{height:64px;background:white;border-bottom:1px solid #e3e8df;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:11px;color:#718075}.main header b{color:#34443b}.content{max-width:1150px;margin:auto;padding:34px 28px}.content>small{font-size:9px;letter-spacing:.15em;color:#78877c;font-weight:bold}.content h1{font-size:30px;margin:9px 0}.content>p{font-size:12px;color:#718075}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:25px 0}.stats div,.panel{background:white;border:1px solid #e2e8df;border-radius:5px;padding:17px}.stats div{display:grid;gap:7px}.stats svg{width:18px;color:#68844f}.stats b{font-size:21px}.stats small{font-size:10px;color:#77847a}.panel{margin:13px 0;padding:21px}.panel h2{font-size:16px;margin:0 0 17px}.panel>p{font-size:12px;color:#78857c}.panel article{border-top:1px solid #edf0eb;padding:14px 0;display:grid;gap:7px;font-size:11px}.panel article b{font-size:12px}.panel article span{color:#52733d;font-size:10px}.panel article p,.panel article small{color:#718075;line-height:1.6}.panel article strong{color:#315b40}.panel article button{border:0;background:#1e493b;color:white;padding:9px 12px;margin:4px 7px 0 0;border-radius:4px;font-size:10px;font-weight:bold}.panel article ul{padding-left:18px;color:#718075;line-height:1.8}.formgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}.stack{max-width:650px}.stack textarea{min-height:75px}.stack label{display:grid;gap:7px;font-size:11px;font-weight:bold}.stack input,.stack select,.stack textarea{width:100%;padding:12px;border:1px solid #d9e1d7;border-radius:4px;font:13px Arial}.stack .formgrid{margin:0}.portal .error,.portal .success{margin:12px 0}.portal .success{background:#edf5e9;color:#315c32}.portal .error{background:#fff0ed;color:#9b3026}
+@media(max-width:850px){.portal{grid-template-columns:185px 1fr}.stats{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.portal{display:block}.portal aside{min-height:auto;padding:13px}.portal aside .brand{padding-bottom:12px}.portal nav{display:flex;overflow:auto}.portal nav button{white-space:nowrap}.logout{margin-top:10px;padding-top:12px}.main header{padding:0 14px}.content{padding:22px 14px}.stats{gap:7px}.panel{padding:15px}.formgrid{grid-template-columns:1fr}}`;
