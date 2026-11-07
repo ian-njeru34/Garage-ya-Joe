@@ -40,36 +40,35 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacin
 
 
 
-/* Care in every detail — real workshop photography */
+
+/* Single cinematic servicing sequence */
 .service-story{padding:104px 0 96px;background:radial-gradient(ellipse at 50% 0%,#13202b 0%,#090c10 54%,#06080a 100%);border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12;overflow:hidden}
-.service-story-heading{max-width:760px;margin:0 auto 48px;text-align:center}
+.service-story-heading{max-width:780px;margin:0 auto 42px;text-align:center}
 .service-story-heading h2{font-size:clamp(35px,4.5vw,56px);line-height:1.12;margin:16px 0}
-.service-story-heading p{max-width:680px;margin:0 auto;color:#aeb8c1;font-size:13px;line-height:1.9}
-.service-sequence{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;position:relative}
-.service-scene{min-width:0;background:linear-gradient(155deg,#141c23,#0b0f13 70%);border:1px solid #9cc5e226;border-radius:4px;overflow:hidden;box-shadow:0 22px 60px #0005;transition:border-color .3s,transform .3s}
-.service-scene:hover{transform:translateY(-6px);border-color:#9cc5e288}
-.scene-top{height:52px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff12;color:#a9cbe2;font:700 9px 'DM Sans';letter-spacing:.18em}
-.scene-top svg{color:#9cc5e2}
-.scene-art{height:260px;position:relative;overflow:hidden;background:#0a1015}
-.service-photo{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.78) contrast(1.06);transform:scale(1.02);transition:transform 1.2s cubic-bezier(.2,.7,.2,1),filter .8s}
-.service-scene:hover .service-photo{transform:scale(1.09);filter:saturate(1) contrast(1.08)}
-.oil-drain-photo{background-image:url('https://images.squarespace-cdn.com/content/v1/66cf56b09e9f0b06780a96/19802a7c-9c86-4372-ada0-7a989149ba55/Untitled-1%2Bcopy.jpg?format=1500w');background-position:center 52%;animation:oil-photo-drain 12s ease-in-out infinite}
-.oil-refill-photo{background-image:url('https://cms.website.tiretutor.com/api/media/file/oil-change-service-38.png');background-position:center 48%;opacity:0;animation:oil-photo-refill 12s ease-in-out infinite}
-@keyframes oil-photo-drain{0%,43%{opacity:1}50%,93%{opacity:0}100%{opacity:1}}
-@keyframes oil-photo-refill{0%,43%{opacity:0}50%,93%{opacity:1}100%{opacity:0}}
-.transmission-photo{background-image:url('https://assets.zyrosite.com/cdn-cgi/image/format%3Dauto%2Cw%3D768%2Ch%3D583%2Cfit%3Dcrop/A0xvNBve2xFgg2Lo/chatgpt-image-7-de-fev.-de-2026-15_05_18-sS8ZA74OsYlKH3Un.png');background-position:center 52%}
-.air-filter-photo{background-image:url('https://lirp.cdn-website.com/ebfbd06d/dms3rep/multi/opt/Why%2BPreventative%2BMaintenance%2BIs%2Bthe%2BBest%2BAuto%2BEngine%2BRepair%2BBountiful%2BUT-1920w.jpg');background-position:center 48%}
-.scene-art:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#05080be8 0%,#05080b25 45%,#05080b08 100%);pointer-events:none}
-.photo-caption{position:absolute;z-index:1;left:17px;right:17px;bottom:16px;display:flex;align-items:center;gap:9px;color:#f0f5f8;font:700 8px 'DM Sans';letter-spacing:.14em;text-shadow:0 2px 8px #000}
-.photo-caption i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#9cc5e2;box-shadow:0 0 10px #9cc5e2}
-.scene-copy{padding:21px 21px 23px}
-.scene-copy h3{font:600 17px Manrope;margin:0 0 9px;color:#f4f6f8}
-.scene-copy p{font-size:11px;line-height:1.8;color:#a9b2ba;min-height:80px;margin:0 0 17px}
-.scene-status{display:flex;align-items:center;gap:8px;color:#9cc5e2;font:700 8px 'DM Sans';letter-spacing:.13em}
-.scene-status svg{color:#8fc6a8}
-.service-story-foot{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:22px;border-top:1px solid #ffffff18}
-.service-story-foot>span{display:flex;align-items:center;gap:9px;color:#8f9ca6;font-size:10px;letter-spacing:.08em}
-.service-story-foot>span i{width:7px;height:7px;border-radius:50%;background:#8fc6a8;box-shadow:0 0 12px #8fc6a8}
-@media(max-width:850px){.service-sequence{grid-template-columns:1fr;max-width:560px;margin:auto}.scene-art{height:300px}.scene-copy p{min-height:0}.service-story{padding:78px 0}}
-@media(max-width:520px){.service-story-heading{text-align:left}.service-story-foot{align-items:flex-start;flex-direction:column;gap:18px}.scene-art{height:235px}}
-@media(prefers-reduced-motion:reduce){.service-story *{animation:none!important;transition:none!important}}
+.service-story-heading p{max-width:650px;margin:0 auto;color:#aeb8c1;font-size:13px;line-height:1.9}
+.service-showcase{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);min-height:440px;border:1px solid #9cc5e233;background:#0b1015;box-shadow:0 28px 75px #0008;overflow:hidden}
+.service-showcase-image{position:relative;min-height:440px;background-size:cover;background-position:center;background-color:#101820;animation:showcase-image-in .65s ease both}
+@keyframes showcase-image-in{from{opacity:.35;transform:scale(1.025)}to{opacity:1;transform:scale(1)}}
+.showcase-image-top,.showcase-image-bottom{position:absolute;left:25px;right:25px;display:flex;align-items:center;justify-content:space-between;color:#e8f0f5;font:700 8px 'DM Sans';letter-spacing:.17em;text-shadow:0 2px 8px #000}
+.showcase-image-top{top:23px}.showcase-image-top i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#9cc5e2;margin:0 8px 1px}
+.showcase-image-bottom{bottom:23px;justify-content:flex-start;gap:9px;color:#d4e4ed}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#8fc6a8;box-shadow:0 0 12px #8fc6a8}
+.service-showcase-copy{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:42px 38px;animation:showcase-copy-in .45s ease both}
+@keyframes showcase-copy-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.showcase-stage{display:flex;align-items:center;gap:12px;color:#9cc5e2;font:700 9px 'DM Sans';letter-spacing:.18em}
+.showcase-stage span{color:#fff;font:500 13px Manrope}
+.showcase-icon{width:52px;height:52px;display:grid;place-items:center;margin:28px 0 19px;border:1px solid #9cc5e24d;background:#9cc5e20c;color:#9cc5e2}
+.service-showcase-copy h3{font:600 clamp(22px,2.2vw,29px) Manrope;line-height:1.2;letter-spacing:-.035em;color:#f4f6f8;margin:0 0 13px}
+.service-showcase-copy>p{color:#a9b2ba;font-size:12px;line-height:1.9;margin:0;max-width:390px;min-height:88px}
+.showcase-action{display:flex;align-items:center;gap:9px;margin-top:21px;color:#9cc5e2;font:700 8px 'DM Sans';letter-spacing:.13em}
+.showcase-action svg{color:#8fc6a8}
+.showcase-progress{display:flex;gap:7px;margin-top:29px}
+.showcase-progress button{width:22px;height:3px;padding:0;border:0;background:#52616c;cursor:pointer;transition:width .25s,background .25s}
+.showcase-progress button.active{width:42px;background:#9cc5e2}
+.showcase-progress button:focus-visible{outline:2px solid #fff;outline-offset:5px}
+.showcase-footer{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:25px;padding-top:17px;border-top:1px solid #ffffff18}
+.showcase-footer>span{color:#7f8d97;font:700 7px 'DM Sans';letter-spacing:.13em}
+.showcase-footer a{display:flex;align-items:center;gap:7px;color:#9cc5e2;font-size:10px;font-weight:700;white-space:nowrap}
+@media(max-width:850px){.service-showcase{grid-template-columns:1fr}.service-showcase-image{min-height:350px}.service-showcase-copy{padding:32px}.service-showcase-copy>p{min-height:0}}
+@media(max-width:520px){.service-story{padding:75px 0}.service-story-heading{text-align:left}.service-showcase-image{min-height:255px}.showcase-image-top,.showcase-image-bottom{left:16px;right:16px}.service-showcase-copy{padding:27px 22px}.showcase-footer{align-items:flex-start;flex-direction:column}.service-showcase-copy>p{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.service-showcase-image,.service-showcase-copy{animation:none!important}}
