@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const REDIRECT_URL = "https://garage-ya-joe.vercel.app/auth/reset-password";
+const REDIRECT_URL = typeof window !== "undefined" ? new URL("/auth/reset-password", window.location.origin).toString() : "/auth/reset-password";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -39,10 +39,10 @@ export default function ForgotPasswordPage() {
   return (
     <main className="forgot-shell">
       <section className="forgot-card">
-        <a className="brand" href="/">GARAGE <b>YA JOE</b></a>
+        <a className="brand" href="/">THE GARAGE</a>
         <span className="eyebrow">ACCOUNT SECURITY</span>
         <h1>Forgot your password?</h1>
-        <p className="intro">Enter the email address associated with your Garage ya Joe account. We’ll send a secure link to choose a new password.</p>
+        <p className="intro">Enter the email address associated with your The Garage account. We’ll send a secure link to choose a new password.</p>
         {sent ? (
           <div className="success" role="status">
             If an account exists for <strong>{email.trim()}</strong>, a password-reset email has been requested. Check your inbox and spam folder, then open the newest email on this device.
