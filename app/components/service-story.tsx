@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import GarageLogo from "./garage-logo";
 import { ArrowRight, CheckCircle2, Cog, Droplet, Filter, Gauge, Wrench } from "lucide-react";
 
 const stages = [
@@ -26,7 +27,7 @@ export default function ServiceStory() {
     <section className="service-story" id="care" aria-label="The care in every detail">
       <div className="container">
         <div className="service-story-heading" data-reveal>
-          <span className="eyebrow">THE CARE IN EVERY DETAIL</span>
+          <div className="service-story-brand"><GarageLogo /><span>THE GARAGE</span></div><span className="eyebrow">THE CARE IN EVERY DETAIL</span>
           <h2>One service. <em>Every detail.</em></h2>
           <p>Follow a real workshop service from the first inspection to the final checks. A new part of the process comes into focus every 1.5 seconds.</p>
         </div>
@@ -42,7 +43,7 @@ export default function ServiceStory() {
           }}
         >
           <div className="service-showcase-image" key={stage.number} role="img" aria-label={stage.alt} style={{ backgroundImage: `linear-gradient(90deg, #05090dcc 0%, #05090d55 58%, #05090d22 100%), url("${stage.image}")` }}>
-            <div className="showcase-image-top"><span>THE GARAGE <i /> WORKSHOP PROCESS</span><span>{stage.number} / 06</span></div>
+            <div className="showcase-image-top"><span className="showcase-brand"><GarageLogo /> THE GARAGE <i /> WORKSHOP PROCESS</span><span>{stage.number} / 06</span></div>
             <div className="showcase-image-bottom"><span className="live-dot" /> LIVE SERVICE SEQUENCE</div>
           </div>
           <div className="service-showcase-copy" key={stage.number + "-copy"}>
