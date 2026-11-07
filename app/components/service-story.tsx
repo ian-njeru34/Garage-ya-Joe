@@ -4,12 +4,12 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Cog, Droplet, Filter, Gauge, Wrench } from "lucide-react";
 
 const stages = [
-  { number:"06", label:"ENGINE OIL", title:"Drain the used engine oil.", description:"The vehicle is secured on a lift, the sump plug is removed and old engine oil is collected in a drain pan.", action:"RAISE · DRAIN · COLLECT", icon:Droplet },
-  { number:"06", label:"OIL FILTER", title:"Renew the oil filter.", description:"The old filter is removed, the sealing surface is checked and a new filter is fitted correctly to the vehicle specification.", action:"REMOVE · INSPECT · FIT", icon:Wrench },
-  { number:"06", label:"FRESH ENGINE OIL", title:"Refill to the correct specification.", description:"Fresh oil of the manufacturer-recommended grade is poured in, then the level is checked using the correct procedure.", action:"SELECT GRADE · REFILL · CHECK", icon:Gauge },
-  { number:"06", label:"TRANSMISSION", title:"Service the gearbox fluid.", description:"The transmission is inspected and, where required, old fluid is drained and replaced with the exact fluid specified for that gearbox.", action:"INSPECT · DRAIN · REFILL", icon:Cog },
-  { number:"06", label:"AIR FILTER", title:"Replace the dirty air filter.", description:"The air-box is opened, the used filter is removed, the housing is checked and a clean correctly seated filter is installed.", action:"OPEN · REPLACE · SECURE", icon:Filter },
-  { number:"06", label:"FINAL CHECKS", title:"Check the work before the drive.", description:"Fluid levels, leaks, service points and the engine bay are checked before the vehicle is lowered and handed back.", action:"VERIFY · CLEAN · HAND OVER", icon:CheckCircle2 },
+  { nunumber:"01", label:"ENGINE OIL", title:"Drain the used engine oil.", description:"The vehicle is secured on a lift, the sump plug is removed and old engine oil is collected in a drain pan.", action:"RAISE · DRAIN · COLLECT", icon:Droplet },
+  { nunumber:"02", label:"OIL FILTER", title:"Renew the oil filter.", description:"The old filter is removed, the sealing surface is checked and a new filter is fitted correctly to the vehicle specification.", action:"REMOVE · INSPECT · FIT", icon:Wrench },
+  { nunumber:"03", label:"FRESH ENGINE OIL", title:"Refill to the correct specification.", description:"Fresh oil of the manufacturer-recommended grade is poured in, then the level is checked using the correct procedure.", action:"SELECT GRADE · REFILL · CHECK", icon:Gauge },
+  { nunumber:"04", label:"TRANSMISSION", title:"Service the gearbox fluid.", description:"The transmission is inspected and, where required, old fluid is drained and replaced with the exact fluid specified for that gearbox.", action:"INSPECT · DRAIN · REFILL", icon:Cog },
+  { nunumber:"05", label:"AIR FILTER", title:"Replace the dirty air filter.", description:"The air-box is opened, the used filter is removed, the housing is checked and a clean correctly seated filter is installed.", action:"OPEN · REPLACE · SECURE", icon:Filter },
+  { nunumber:"06", label:"FINAL CHECKS", title:"Check the work before the drive.", description:"Fluid levels, leaks, service points and the engine bay are checked before the vehicle is lowered and handed back.", action:"VERIFY · CLEAN · HAND OVER", icon:CheckCircle2 },
 ];
 
 export default function ServiceStory() {
@@ -47,7 +47,7 @@ export default function ServiceStory() {
             <h3>{stage.title}</h3><p>{stage.description}</p>
             <div className="showcase-action"><CheckCircle2 size={15} /> {stage.action}</div>
             <div className="showcase-progress" aria-label={`Service step ${active + 1} of ${stages.length}`}>
-              {stages.map((item, index) => <button key={item.number} type="button" className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Show step ${item.number}: ${item.label}`} aria-current={index === active ? "step" : undefined} />)}
+              {stages.map((item, index) => <button key={item.label} type="button" className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`Show step ${item.number}: ${item.label}`} aria-current={index === active ? "step" : undefined} />)}
             </div>
             <div className="showcase-footer"><span>{isPaused ? "PAUSED · MOVE POINTER AWAY TO RESUME" : "HOVER TO PAUSE · AUTO-ADVANCES EVERY 1.5 SECONDS"}</span><Link href="/enquire">Book a service <ArrowRight size={15} /></Link></div>
           </div>
