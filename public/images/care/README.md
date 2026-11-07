@@ -13,6 +13,14 @@ Use these exact filenames so they can be connected to the six automatic service 
 5. `05-air-filter-replacement.jpg` — mechanic removing a dirty pleated air filter and fitting a clean one.
 6. `06-final-vehicle-checks.jpg` — mechanic completing final checks in the engine bay.
 
+## Homepage hero image
+
+Upload the homepage hero photograph into this same folder using this exact filename:
+
+- `hero-main.jpg` — wide, cinematic photograph of a premium vehicle in a professional automotive workshop or dramatic studio. This image is used as the homepage hero background and takes priority over the built-in fallback photograph.
+
+Recommended: landscape 16:9, high resolution (at least 1920 × 1080), clear vehicle subject, no text, watermark or third-party logo. To change the hero later, replace `hero-main.jpg` with your new photograph and keep the filename unchanged.
+
 ## Image guidance
 
 - Use real workshop photography rather than illustrations or generic stock graphics.
