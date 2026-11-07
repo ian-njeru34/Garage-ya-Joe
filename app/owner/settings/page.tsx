@@ -2,7 +2,7 @@
 import {useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {useRouter} from "next/navigation";
-import {ArrowLeft,Facebook,MessageCircle,Save,CheckCircle2,Youtube,Instagram,Twitter} from "lucide-react";
+import {ArrowLeft,Facebook,MessageCircle,Phone,Save,CheckCircle2,Youtube,Instagram,Twitter} from "lucide-react";
 const sb=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 export default function OwnerSettingsPage(){
  const router=useRouter();const [businessId,setBusinessId]=useState("");
