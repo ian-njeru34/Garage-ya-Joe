@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { Eye, EyeOff } from "lucide-react";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -21,6 +22,8 @@ export default function ResetPasswordPage() {
   const [checking, setChecking] = useState(true);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -125,9 +128,9 @@ export default function ResetPasswordPage() {
         {ready && !message ? (
           <form className="reset-form" onSubmit={handleSubmit}>
             <label htmlFor="new-password">New password</label>
-            <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div className="password-field"><input id="new-password" type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} /><button type="button" className="password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((v) => !v)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
             <label htmlFor="confirm-password">Confirm new password</label>
-            <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <div className="password-field"><input id="confirm-password" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button type="button" className="password-toggle" aria-label={showConfirmPassword ? "Hide password" : "Show password"} aria-pressed={showConfirmPassword} onClick={() => setShowConfirmPassword((v) => !v)}>{showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
             {error ? <div className="reset-alert" role="alert">{error}</div> : null}
             <button type="submit" disabled={busy}>{busy ? "Updating password…" : "Update password"}</button>
           </form>
@@ -145,7 +148,7 @@ export default function ResetPasswordPage() {
         .reset-intro,.reset-help{color:#66736d;font-size:14px;line-height:1.7}
         .reset-form{display:grid;gap:10px;margin-top:25px}
         label{font-size:12px;font-weight:700;margin-top:7px}
-        input{width:100%;padding:13px;border:1px solid #d9e0d8;border-radius:5px;font-size:15px;outline-color:#638044}
+        input{width:100%;padding:13px;border:1px solid #d9e0d8;border-radius:5px;font-size:15px;outline-color:#638044}.password-field{position:relative;display:flex;align-items:center}.password-field input{padding-right:48px}.password-toggle{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:38px;height:36px;margin:0;padding:0;display:grid;place-items:center;border:0;background:transparent;color:#607264;cursor:pointer}.password-toggle:hover{color:#1e493b}
         button{margin-top:12px;border:0;border-radius:5px;background:#1e493b;color:#fff;padding:14px;font-weight:700;font-size:13px;cursor:pointer}
         button:disabled{opacity:.6;cursor:wait}
         .reset-alert,.reset-success,.reset-note{padding:12px;border-radius:5px;font-size:13px;line-height:1.6;margin-top:18px}
