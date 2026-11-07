@@ -27,14 +27,10 @@ export default function HomePage() {
         <div className="hero-image" role="img" aria-label="Premium dark sports car in a dramatic automotive studio" />
         <div className="hero-shade" />
         <div className="container hero-content">
-          <div className="hero-copy" data-reveal>
-            <span className="eyebrow"><i/> AUTOMOTIVE CARE YOU CAN TRUST</span>
-            <h1>Every journey.<br/><em>Handled with care.</em></h1>
-            <p>Expert garage care, quality auto spares and hard-to-find imports — all in one place. Your journey deserves the right attention.</p>
+          <div className="hero-copy hero-copy-minimal" data-reveal>
             <div className="hero-actions"><Link className="button primary" href="/enquire">Book a garage service <ArrowRight size={17}/></Link><Link className="button ghost" href="/spares">Find a spare part</Link></div>
             <div className="trust"><span><ShieldCheck size={16}/> Clear quotations</span><span><Clock3 size={16}/> Updates you can trust</span></div>
           </div>
-          <div className="hero-note" data-reveal><Heart size={17}/><span>For every mile<br/><b>that matters.</b></span></div>
           <a className="scroll-cue" href="#spares"><span/> SCROLL TO EXPLORE</a>
         </div>
       </section>
