@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient, User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import GarageLogo from "../components/garage-logo";
 import {
   LayoutDashboard, Wrench, Users, Package, Warehouse, Ship,
   FileText, ShoppingCart, Wallet, UserCog, Settings, LogOut,
@@ -84,26 +85,26 @@ export default function OwnerDashboardPage() {
   return (
     <main className="owner-shell">
       <aside className="sidebar">
-        <a className="brand" href="/"><span className="mark">J</span><span>GARAGE <b>YA JOE</b><small>OWNER WORKSPACE</small></span></a>
+        <a className="brand" href="/"><GarageLogo/><span>THE GARAGE<small>OWNER WORKSPACE</small></span></a>
         <div className="side-label">WORKSPACE</div>
         <nav>{sections.map(({label,href,icon:Icon},index)=><a key={href} href={href} className={index===0?"active":""}><Icon size={17}/><span>{label}</span>{index===0?<i/>:null}</a>)}</nav>
         <div className="side-bottom"><ShieldCheck size={16}/><span>Owner access verified</span></div>
       </aside>
       <section className="main">
-        <header className="topbar"><div><span className="crumb">Garage ya Joe</span><span className="slash">/</span><b>Overview</b></div><div className="account"><span className="avatar">{(user?.email?.[0]||"O").toUpperCase()}</span><span className="account-email">{user?.email}</span><button onClick={signOut} disabled={signingOut}><LogOut size={15}/><span>{signingOut?"Signing out…":"Sign out"}</span></button></div></header>
+        <header className="topbar"><div><span className="crumb">The Garage</span><span className="slash">/</span><b>Overview</b></div><div className="account"><span className="avatar">{(user?.email?.[0]||"O").toUpperCase()}</span><span className="account-email">{user?.email}</span><button onClick={signOut} disabled={signingOut}><LogOut size={15}/><span>{signingOut?"Signing out…":"Sign out"}</span></button></div></header>
         <div className="content">
-          <div className="welcome"><div><span className="eyebrow">BUSINESS MANAGEMENT</span><h1>Owner overview</h1><p>Welcome to your Garage ya Joe workspace. Manage your operations from one place.</p></div><span className="verified"><ShieldCheck size={15}/> Owner account</span></div>
+          <div className="welcome"><div><span className="eyebrow">BUSINESS MANAGEMENT</span><h1>Owner overview</h1><p>Welcome to your The Garage workspace. Manage your operations from one place.</p></div><span className="verified"><ShieldCheck size={15}/> Owner account</span></div>
           <section className="notice"><div className="notice-icon"><LayoutDashboard size={19}/></div><div><b>Your owner workspace is ready to configure</b><p>This is the secure starting point for your business dashboard. Operational summaries will appear here as garage, inventory, sales and finance workflows are connected.</p></div></section>
           <div className="section-head"><div><h2>Business modules</h2><p>Choose an area to manage.</p></div><span>MAIN BRANCH</span></div>
           <div className="module-grid">{sections.slice(1).map(({label,href,icon:Icon,description})=><a href={href} key={href} className="module"><div className="module-icon"><Icon size={20}/></div><div className="module-copy"><b>{label}</b><p>{description}</p></div><ArrowUpRight size={16} className="arrow"/></a>)}</div>
-          <footer>GARAGE YA JOE <span>·</span> Owner workspace</footer>
+          <footer>THE GARAGE <span>·</span> Owner workspace</footer>
         </div>
       </section>
       <style jsx>{`
         .owner-shell{min-height:100vh;background:#f5f6f1;color:#17231f;font-family:Arial,sans-serif;display:grid;grid-template-columns:250px 1fr}
         .sidebar{background:#17382e;color:#e7eee8;padding:25px 16px;display:flex;flex-direction:column;min-height:100vh}
         .brand{display:flex;align-items:center;gap:10px;padding:0 8px 30px;color:#fff;font-size:14px;font-weight:800;letter-spacing:.06em}
-        .mark{width:36px;height:36px;background:#c5e46a;color:#183b30;display:grid;place-items:center;border-radius:6px;font-size:22px}
+        .brand :global(.brand-mark){width:45px;height:38px;display:block;flex:none}
         .brand small{display:block;color:#a9bcb0;font-size:8px;letter-spacing:.16em;margin-top:4px}
         .side-label{font-size:9px;font-weight:700;letter-spacing:.17em;color:#91a79a;padding:8px 12px 12px}
         nav{display:grid;gap:4px}nav a{height:42px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:5px;color:#c4d1c8;font-size:12px;font-weight:600}nav a.active{background:#2a5141;color:#fff}nav a i{width:6px;height:6px;border-radius:50%;background:#c5e46a;margin-left:auto}
