@@ -14,7 +14,7 @@ const sections = [
   { label: "Overview", href: "/owner", icon: LayoutDashboard, description: "Business activity and key updates" },
   { label: "Garage", href: "/owner/garage", icon: Wrench, description: "Appointments, inspections and job cards" },
   { label: "Customers", href: "/owner/customers", icon: Users, description: "Customer accounts and service history" },
-  { label: "Vehicles for sale", href: "/owner/vehicles-for-sale", icon: CarFront, description: "Manage homepage vehicle adverts" },
+  { label: "Vehicle adverts", href: "/owner/vehicles-for-sale", icon: CarFront, description: "Create, publish, edit, hide and delete cars advertised on the homepage" },
   { label: "Enquiries", href: "/owner/enquiries", icon: MessageCircle, description: "Customer requests and WhatsApp follow-up" },
   { label: "Auto Spares", href: "/owner/spares", icon: Package, description: "Parts catalogue and sales enquiries" },
   { label: "Inventory", href: "/owner/inventory", icon: Warehouse, description: "Stock levels, receipts and transfers" },
