@@ -113,10 +113,10 @@ export default function ResetPasswordPage() {
   return (
     <main className="reset-shell">
       <section className="reset-card">
-        <a className="reset-brand" href="/">GARAGE <b>YA JOE</b></a>
+        <a className="reset-brand" href="/">THE GARAGE</a>
         <span className="reset-eyebrow">ACCOUNT SECURITY</span>
         <h1>Set a new password</h1>
-        <p className="reset-intro">Choose a new password for your Garage ya Joe account.</p>
+        <p className="reset-intro">Choose a new password for your The Garage account.</p>
 
         {checking ? <p className="reset-note">Checking your secure reset link…</p> : null}
         {!checking && error && !ready ? <div className="reset-alert" role="alert">{error}</div> : null}
