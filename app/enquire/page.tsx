@@ -20,8 +20,9 @@ export default function EnquirePage() {
   async function prepare(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
     setBusy(true);setError("");setSuccess("");setPrepared("");
+    const website=String(new FormData(event.currentTarget).get("website")||"");
     try{
-      const response=await fetch("/api/public/requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"enquiry",fullName:name,whatsapp:phone,email,vehicleDetails:vehicle,enquiryType:request,details,website:""})});
+      const response=await fetch("/api/public/requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"enquiry",fullName:name,whatsapp:phone,email,vehicleDetails:vehicle,enquiryType:request,details,website})});
       const result=await response.json();
       if(!response.ok)throw new Error(result.error||"Your enquiry could not be saved.");
       setSuccess("Your enquiry has been received by The Garage.");
