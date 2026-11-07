@@ -6,6 +6,7 @@ import BackToTop from "./components/back-to-top";
 import ServiceStory from "./components/service-story";
 import GarageLogo from "./components/garage-logo";
 import VehicleAdSlider from "./components/vehicle-ad-slider";
+import CallButton from "./components/call-button";
 
 const services = [
   { icon: Wrench, title: "Vehicle servicing", text: "Routine maintenance, diagnostics and scheduled servicing." },
@@ -18,7 +19,7 @@ export default function HomePage() {
   return <ScrollExperience>
     <main>
       <div id="top" />
-      <div className="utility"><div className="container utility-inner"><span><MapPin size={13}/> AUTOMOTIVE CARE · KENYA</span><div className="utility-actions"><a href="#garage-call" aria-label="Call The Garage"><Phone size={15}/> Call us</a><Link href="/customer">Customer account <ArrowRight size={13}/></Link></div></div></div>
+      <div className="utility"><div className="container utility-inner"><span><MapPin size={13}/> AUTOMOTIVE CARE · KENYA</span><div className="utility-actions"><CallButton compact/><Link href="/customer">Customer account <ArrowRight size={13}/></Link></div></div></div>
       <header className="site-header"><div className="container nav">
         <Link className="brand" href="/" aria-label="The Garage home"><GarageLogo /><span className="brand-wordmark">THE <b>GARAGE</b><small>CARE · PERFORMANCE · PARTS</small></span></Link>
         <nav><a href="#services">Services</a><a href="#spares">Auto spares</a><a href="#how">Our process</a><a href="#contact">Contact</a></nav>
@@ -49,7 +50,7 @@ export default function HomePage() {
 
       <section className="contact" id="contact"><div className="container contact-split"><div className="vehicle-ad-column"><VehicleAdSlider/></div><div className="contact-box" data-reveal><span className="eyebrow">LET'S GET YOU MOVING</span><h2>Ready when<br/><em>you are.</em></h2><p>Tell us what your vehicle needs, find a spare part or request a special import quotation. Start an enquiry in just a few steps.</p><div className="contact-actions"><Link className="button primary" href="/enquire">Make an enquiry <ArrowRight size={17}/></Link><Link className="button light" href="/customer">Customer login</Link><small><Phone size={13}/> Call or message our team.</small></div></div></div></section>
 
-      <div className="home-call-bar" id="garage-call"><a href="tel:" aria-label="Call The Garage"><Phone size={17}/><span>Call The Garage</span></a></div><SiteFooter />
+      <div className="home-call-bar"><CallButton/></div><SiteFooter />
       <BackToTop />
     </main>
   </ScrollExperience>;
