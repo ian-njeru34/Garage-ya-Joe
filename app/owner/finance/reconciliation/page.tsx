@@ -11,9 +11,14 @@ export default function ReconciliationPage(){
  const load=useCallback(async()=>{const s=db();const{data:{user}}=await s.auth.getUser();if(!user){router.replace("/customer");return}const{data:roles,error:re}=await s.from("user_roles").select("business_id,role_code").eq("user_id",user.id);if(re)throw re;const role=roles?.find(x=>["owner","accountant","administrator"].includes(x.role_code));if(!role?.business_id){router.replace("/customer");return}BI(role.business_id);OWNER(role.role_code==="owner");
  const [p,r,j,c,a,b,h,i,l]=await Promise.all([
  s.from("accounting_periods").select("id,period_name,starts_on,ends_on,status,closed_at").eq("business_id",role.business_id).order("starts_on",{ascending:false}),
- s.from("payment_statement_lines").select("id,import_id,transaction_date,amount,currency_code,status,review_category").eq("business_id",role.business_id).limit(5000),
+ s.from("payment_statement_lines").select("id,import_id,cash_account_id,transaction_date,amount,currency_code,status,review_category").eq("business_id",role.business_id).limit(5000),
  s.from("journal_entries").select("id,entry_number,entry_date,description,status,accounting_period_id").eq("business_id",role.business_id).order("entry_date",{ascending:false}).limit(2000),
- s.from("accounting_period_reconciliations").select("id,accounting_period_id,period_name,statement_line_count,verified_line_count,classified_line_count,posted_journal_count,total_debits_kes,total_credits_kes,closed_by,closed_at,close_note").eq("business_id",role.business_id).order("closed_at",{ascending:false})
+ s.from("accounting_period_reconciliations").select("id,accounting_period_id,period_name,statement_line_count,verified_line_count,classified_line_count,posted_journal_count,total_debits_kes,total_credits_kes,closed_by,closed_at,close_note").eq("business_id",role.business_id).order("closed_at",{ascending:false}),
+ s.from("cash_accounts").select("id,account_name,account_type,currency_code,ledger_account_id,location_id,is_active").eq("business_id",role.business_id).eq("is_active",true),
+ s.from("cash_account_period_balances").select("id,cash_account_id,accounting_period_id,opening_balance_kes,statement_closing_balance_kes,opening_balance_as_at,statement_closing_as_at,note,updated_at").eq("business_id",role.business_id),
+ s.from("cash_account_period_balance_audit").select("id,cash_account_id,accounting_period_id,opening_balance_kes,statement_closing_balance_kes,change_note,changed_at").eq("business_id",role.business_id).order("changed_at",{ascending:false}).limit(100),
+ s.from("payment_statement_imports").select("id,cash_account_id,flow,source,file_name").eq("business_id",role.business_id),
+ s.from("journal_lines").select("journal_entry_id,account_id,debit_kes,credit_kes").eq("business_id",role.business_id)
  ]);
  for(const x of [p,r,j,c,a,b,h,i,l])if(x.error)throw x.error;P(p.data||[]);LL(r.data||[]);JJ(j.data||[]);SS(c.data||[]);CA(a.data||[]);BA(b.data||[]);AU(h.data||[]);IM(i.data||[]);JL(l.data||[]);if(!selected&&p.data?.length)SEL(p.data[0].id);else if(selected&&!p.data?.some(x=>x.id===selected))SEL(p.data?.[0]?.id||"");
  },[router,selected]);
