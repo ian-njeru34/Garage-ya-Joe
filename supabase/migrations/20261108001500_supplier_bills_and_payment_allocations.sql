@@ -53,7 +53,9 @@ create table public.supplier_bill_payment_allocations (
  amount_kes numeric(18,2) not null check(amount_kes>0),
  allocated_by uuid references public.profiles(id) on delete set null,
  allocated_at timestamptz not null default now(),
- unique(business_id,supplier_bill_id,supplier_payment_id),
+ allocation_status text not null default 'active' check(allocation_status in ('active','reversed')),
+ reversed_at timestamptz,
+ reversal_reason text,
  foreign key(business_id,supplier_bill_id) references public.supplier_bills(business_id,id) on delete restrict,
  foreign key(business_id,supplier_payment_id) references public.supplier_payments(business_id,id) on delete restrict
 );
@@ -119,7 +121,7 @@ begin
  if v_ap is null then raise exception 'Accounts payable control account is not configured'; end if;
  v_journal:=gen_random_uuid();
  insert into public.journal_entries(id,business_id,location_id,accounting_period_id,entry_number,entry_date,description,source_type,source_id,currency_code,exchange_rate_to_kes,status,created_by)
- values(v_journal,p_business_id,v_bill.location_id,v_period,'BILL-'||replace(v_bill.supplier_invoice_number,' ',''),v_bill.bill_date,'Supplier bill '||v_bill.supplier_invoice_number,'supplier_bill',v_bill.id,v_bill.currency_code,v_bill.exchange_rate_to_kes,'draft',v_uid);
+ values(v_journal,p_business_id,v_bill.location_id,v_period,'BILL-'||left(replace(v_bill.supplier_invoice_number,' ',''),24)||'-'||left(replace(v_bill.id::text,'-',''),8),v_bill.bill_date,'Supplier bill '||v_bill.supplier_invoice_number,'supplier_bill',v_bill.id,v_bill.currency_code,v_bill.exchange_rate_to_kes,'draft',v_uid);
  for v_line in select * from public.supplier_bill_lines where business_id=p_business_id and supplier_bill_id=v_bill.id order by line_number loop
   v_no:=v_no+1;
   insert into public.journal_lines(business_id,journal_entry_id,line_number,account_id,description,currency_code,exchange_rate_to_kes,debit_amount,credit_amount,debit_kes,credit_kes)
@@ -148,7 +150,7 @@ begin
  if v_bill.supplier_id<>v_pay.supplier_id then raise exception 'Payment and bill must belong to the same supplier'; end if;
  if v_bill.status not in ('approved','partially_paid') then raise exception 'Only approved unpaid bills can receive allocations'; end if;
  if p_amount_kes is null or p_amount_kes<=0 then raise exception 'Enter a positive allocation amount'; end if;
- select coalesce(sum(amount_kes),0) into v_alloc from public.supplier_bill_payment_allocations where business_id=p_business_id and supplier_payment_id=p_payment_id;
+ select coalesce(sum(amount_kes),0) into v_alloc from public.supplier_bill_payment_allocations where business_id=p_business_id and supplier_payment_id=p_payment_id and allocation_status='active';
  v_unallocated:=v_pay.amount_kes-v_alloc;
  v_outstanding:=v_bill.total_kes-v_bill.amount_paid_kes;
  if p_amount_kes>v_unallocated+0.001 then raise exception 'Allocation exceeds the unallocated payment balance (%)',v_unallocated; end if;
@@ -162,3 +164,31 @@ begin
 end; $$;
 revoke all on function public.owner_allocate_supplier_payment(uuid,uuid,uuid,numeric) from public,anon;
 grant execute on function public.owner_allocate_supplier_payment(uuid,uuid,uuid,numeric) to authenticated;
+
+create or replace function public.owner_reverse_supplier_payment(p_business_id uuid,p_payment_id uuid,p_reversal_number text,p_reversal_date date,p_reason text)
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare v_uid uuid:=auth.uid(); v_payment public.supplier_payments%rowtype; v_reversal uuid; v_alloc record;
+begin
+ if v_uid is null then raise exception 'Authentication required' using errcode='42501'; end if;
+ select * into v_payment from public.supplier_payments where business_id=p_business_id and id=p_payment_id for update;
+ if not found then raise exception 'Supplier payment not found'; end if;
+ if not private.has_business_permission(p_business_id,'finance.manage',v_payment.location_id) then raise exception 'Finance management permission required' using errcode='42501'; end if;
+ if v_payment.status<>'recorded' then raise exception 'Only recorded supplier payments can be reversed'; end if;
+ if nullif(btrim(p_reason),'') is null then raise exception 'A reversal reason is required'; end if;
+ for v_alloc in select supplier_bill_id,amount_kes from public.supplier_bill_payment_allocations where business_id=p_business_id and supplier_payment_id=p_payment_id and allocation_status='active' for update loop
+  update public.supplier_bills set amount_paid_kes=greatest(0,amount_paid_kes-v_alloc.amount_kes),
+   status=case when greatest(0,amount_paid_kes-v_alloc.amount_kes)<=0 then 'approved' else 'partially_paid' end,updated_at=now()
+   where business_id=p_business_id and id=v_alloc.supplier_bill_id;
+ end loop;
+ update public.supplier_bill_payment_allocations set allocation_status='reversed',reversed_at=now(),reversal_reason=btrim(p_reason)
+ where business_id=p_business_id and supplier_payment_id=p_payment_id and allocation_status='active';
+ if v_payment.journal_entry_id is not null then
+  v_reversal:=private.reverse_journal_entry_impl(p_business_id,v_payment.journal_entry_id,p_reversal_number,coalesce(p_reversal_date,current_date),p_reason);
+  perform private.post_journal_entry_impl(p_business_id,v_reversal);
+ end if;
+ update public.supplier_payments set status='reversed',reversal_reason=btrim(p_reason),reversed_at=now(),reversed_by=v_uid,reversal_journal_entry_id=v_reversal
+ where business_id=p_business_id and id=p_payment_id;
+ return v_reversal;
+end; $$;
+revoke all on function public.owner_reverse_supplier_payment(uuid,uuid,text,date,text) from public,anon;
+grant execute on function public.owner_reverse_supplier_payment(uuid,uuid,text,date,text) to authenticated;
