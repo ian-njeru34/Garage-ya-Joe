@@ -23,7 +23,8 @@ const sections = [
   { label: "Sales", href: "/owner/sales", icon: ShoppingCart, description: "Orders, invoices and payments" },
   { label: "Finance", href: "/owner/finance", icon: Wallet, description: "Cash flow and financial records" },
   { label: "Staff", href: "/owner/staff", icon: UserCog, description: "Team members, roles and access" },
-  { label: "Settings", href: "/owner/settings", icon: Settings, description: "Business, branch and system settings" },
+  { label: "Branches & locations", href: "/owner/locations", icon: Warehouse, description: "Manage branches, garages and business locations" },
+  { label: "Settings", href: "/owner/settings", icon: Settings, description: "Public contact and social media settings" },
 ];
 
 const metricDefinitions = [
