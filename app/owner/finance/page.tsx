@@ -23,7 +23,7 @@ export default function OwnerFinancePage(){
  const quote=(v:any)=>'"'+String(v??"").replaceAll('"','""')+'"';
  let matrix:any[][]=[];
  if(reportView==="receivables")matrix=[["Invoice","Customer","Due date","Days overdue","Status","Outstanding KES"],...receivableInvoices.map(x=>[x.invoice_number,x.customerName,x.due_date,x.due_date?Math.max(0,Math.floor((Date.now()-new Date(x.due_date+"T00:00:00").getTime())/86400000)):0,x.status,Math.max(0,Number(x.total_kes||0)-Number(x.amount_paid_kes||0))])];
- else if(reportView==="payables")matrix=[["Purchase order","Supplier","Date","Status","Order total KES","Linked payments KES","Estimated remainder KES"],...purchaseOrders.map(x=>[x.po_number,x.supplierName,x.order_date,x.status,x.order_total_kes,x.paidKes,Math.max(0,Number(x.order_total_kes||0)-Number(x.paidKes||0))])];
+ else if(reportView==="payables")matrix=[["Supplier invoice","Supplier","Bill date","Due date","Status","Invoice total KES","Paid KES","Outstanding KES"],...supplierBills.map(x=>[x.supplier_invoice_number,x.supplierName,x.bill_date,x.due_date,x.status,x.total_kes,x.amount_paid_kes,x.outstandingKes])];
  else matrix=[["Account code","Account","Type","Debits KES","Credits KES","Balance KES"],...ledgerBalances.map(x=>[x.account_code,x.account_name,x.account_type,x.debit,x.credit,x.balance])];
  const blob=new Blob([matrix.map(row=>row.map(quote).join(",")).join("\\r\\n")],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="garage-ya-joe-"+reportView+"-"+period+".csv";a.click();URL.revokeObjectURL(url);
  }
