@@ -1,4 +1,5 @@
 "use client";
+import {BusinessName} from "../../components/business-branding";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {useRouter} from "next/navigation";
@@ -64,7 +65,7 @@ export default function GoodsReceiptsPage(){
  const drafts=receipts.filter(r=>r.status==="draft");
  if(loading)return <main className="state">Loading goods receipts…<style jsx>{".state{min-height:100vh;display:grid;place-items:center;background:#f4f6f1;color:#52645a;font:14px Arial}"}</style></main>;
  return <main className="shell"><header><a href="/owner/inventory"><ArrowLeft size={16}/> Inventory</a><span><PackageCheck size={15}/> Goods receiving</span></header><section className="content">
-  <div className="eyebrow">THE GARAGE · INVENTORY CONTROL</div><div className="heading"><div className="heading-icon"><Truck size={24}/></div><div><h1>Goods receipts</h1><p>Receive ordered parts into a warehouse and update stock from the verified receipt.</p></div><button className="refresh" onClick={()=>void load()}><RefreshCw size={14}/> Refresh</button></div>
+  <div className="eyebrow"><BusinessName uppercase/> · INVENTORY CONTROL</div><div className="heading"><div className="heading-icon"><Truck size={24}/></div><div><h1>Goods receipts</h1><p>Receive ordered parts into a warehouse and update stock from the verified receipt.</p></div><button className="refresh" onClick={()=>void load()}><RefreshCw size={14}/> Refresh</button></div>
   {error?<div className="alert error"><AlertTriangle size={16}/><span>{error}</span><button onClick={()=>setError("")}><XIcon/></button></div>:null}
   {success?<div className="alert success"><CheckCircle2 size={16}/>{success}<button onClick={()=>setSuccess("")}><XIcon/></button></div>:null}
   <div className="note"><ClipboardList size={18}/><div><b>Receipts are linked to purchase orders</b><p>Posting a receipt records the movement in the stock ledger and updates the order's received quantities. Only items in good condition increase available stock; damaged or quarantined items remain out of stock.</p></div></div>
