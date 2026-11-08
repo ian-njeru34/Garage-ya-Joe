@@ -1,4 +1,4 @@
-# The Garage — Care section replacement images
+# Website care section replacement images
 
 Upload the six replacement photographs into this folder:
 
