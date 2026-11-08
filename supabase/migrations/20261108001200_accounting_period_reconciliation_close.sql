@@ -52,10 +52,14 @@ begin
  select count(*)::integer into v_drafts from public.journal_entries
  where business_id=p_business_id and entry_date between v_period.starts_on and v_period.ends_on and status='draft';
  if v_drafts>0 then raise exception 'Cannot close period: % journal entries are still drafts',v_drafts;end if;
- select count(*)::integer,coalesce(sum(debit_kes),0),coalesce(sum(credit_kes),0)
+ select count(*)::integer,coalesce(sum(t.debits),0),coalesce(sum(t.credits),0)
  into v_journals,v_debits,v_credits
- from public.journal_entries e join public.journal_lines l on l.journal_entry_id=e.id
- where e.business_id=p_business_id and e.entry_date between v_period.starts_on and v_period.ends_on and e.status='posted';
+ from (
+  select e.id,sum(l.debit_kes) debits,sum(l.credit_kes) credits
+  from public.journal_entries e join public.journal_lines l on l.journal_entry_id=e.id
+  where e.business_id=p_business_id and e.entry_date between v_period.starts_on and v_period.ends_on and e.status='posted'
+  group by e.id
+ ) t;
  select count(*)::integer into v_bad_journals from (
   select e.id from public.journal_entries e join public.journal_lines l on l.journal_entry_id=e.id
   where e.business_id=p_business_id and e.entry_date between v_period.starts_on and v_period.ends_on and e.status='posted'
