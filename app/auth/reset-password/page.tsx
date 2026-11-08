@@ -1,4 +1,5 @@
 "use client";
+import {BusinessName} from "../../components/business-branding";
 
 import { FormEvent, useEffect, useState } from "react";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
@@ -116,7 +117,7 @@ export default function ResetPasswordPage() {
   return (
     <main className="reset-shell">
       <section className="reset-card">
-        <a className="reset-brand" href="/">THE GARAGE</a>
+        <a className="reset-brand" href="/"><BusinessName uppercase/></a>
         <span className="reset-eyebrow">ACCOUNT SECURITY</span>
         <h1>Set a new password</h1>
         <p className="reset-intro">Choose a new password for your The Garage account.</p>
