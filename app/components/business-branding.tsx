@@ -12,11 +12,13 @@ export function BusinessBrandingProvider({children}:{children:ReactNode}){
   if(!url||!key)return;
   let active=true;
   const client=createClient(url,key);
-  client.rpc("get_public_business_branding").then(({data,error})=>{
+  const refresh=()=>client.rpc("get_public_business_branding").then(({data,error})=>{
    if(!active||error||typeof data!=="string"||!data.trim())return;
    const next=data.trim();setName(next);document.title=next+" | Automotive Care & Auto Spares";
   });
-  return()=>{active=false};
+  void refresh();
+  window.addEventListener("business-branding-updated",refresh);
+  return()=>{active=false;window.removeEventListener("business-branding-updated",refresh)};
  },[]);
  return <BrandingContext.Provider value={name}>{children}</BrandingContext.Provider>;
 }
