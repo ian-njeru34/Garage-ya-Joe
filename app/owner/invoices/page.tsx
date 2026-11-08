@@ -3,7 +3,7 @@ import {useCallback,useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {useRouter} from "next/navigation";
 import {ArrowLeft,RefreshCw,FileText,MessageCircle,Download,Wallet,Send,CheckCircle2} from "lucide-react";
-const db=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,{auth:{persistSession:false}});
+const db=()=>createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 const kes=(n:number,c="KES")=>new Intl.NumberFormat("en-KE",{style:"currency",currency:c,maximumFractionDigits:2}).format(Number(n||0));
 type Invoice=any;
 export default function OwnerInvoicesPage(){
