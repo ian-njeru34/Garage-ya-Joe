@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient, User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import GarageLogo from "../components/garage-logo";
+import {BusinessName} from "../components/business-branding";
 import {
   LayoutDashboard, Wrench, Users, Package, Warehouse, Ship, CarFront,
   FileText, ShoppingCart, Wallet, UserCog, Settings, LogOut,
@@ -129,13 +130,13 @@ export default function OwnerDashboardPage() {
   return (
     <main className="owner-shell">
       <aside className="sidebar">
-        <a className="brand" href="/"><GarageLogo/><span>THE GARAGE<small>OWNER WORKSPACE</small></span></a>
+        <a className="brand" href="/"><GarageLogo/><span><BusinessName uppercase/><small>OWNER WORKSPACE</small></span></a>
         <div className="side-label">WORKSPACE</div>
         <nav>{sections.map(({label,href,icon:Icon},index)=><a key={href} href={href} className={index===0?"active":""}><Icon size={17}/><span>{label}</span>{index===0?<i/>:null}</a>)}</nav>
         <div className="side-bottom"><ShieldCheck size={16}/><span>Owner access verified</span></div>
       </aside>
       <section className="main">
-        <header className="topbar"><div><span className="crumb">The Garage</span><span className="slash">/</span><b>Overview</b></div><div className="account"><span className="avatar">{(user?.email?.[0]||"O").toUpperCase()}</span><span className="account-email">{user?.email}</span><button onClick={signOut} disabled={signingOut}><LogOut size={15}/><span>{signingOut?"Signing out…":"Sign out"}</span></button></div></header>
+        <header className="topbar"><div><span className="crumb"><BusinessName/></span><span className="slash">/</span><b>Overview</b></div><div className="account"><span className="avatar">{(user?.email?.[0]||"O").toUpperCase()}</span><span className="account-email">{user?.email}</span><button onClick={signOut} disabled={signingOut}><LogOut size={15}/><span>{signingOut?"Signing out…":"Sign out"}</span></button></div></header>
         <div className="content">
           <div className="welcome"><div><span className="eyebrow">BUSINESS MANAGEMENT</span><h1>Owner overview</h1><p>Live operational snapshot for your garage, parts, procurement and sales.</p></div><span className="verified"><ShieldCheck size={15}/> Owner account</span></div>
           <section className="overview-panel">
@@ -145,7 +146,7 @@ export default function OwnerDashboardPage() {
           </section>
           <div className="section-head"><div><h2>Business modules</h2><p>Open a module to complete day-to-day work.</p></div><span>MAIN BRANCH</span></div>
           <div className="module-grid">{sections.slice(1).map(({label,href,icon:Icon,description})=><a href={href} key={href} className="module"><div className="module-icon"><Icon size={20}/></div><div className="module-copy"><b>{label}</b><p>{description}</p></div><ArrowUpRight size={16} className="arrow"/></a>)}</div>
-          <footer>THE GARAGE <span>·</span> Owner workspace</footer>
+          <footer><BusinessName uppercase/> <span>·</span> Owner workspace</footer>
         </div>
       </section>
       <style jsx>{`
