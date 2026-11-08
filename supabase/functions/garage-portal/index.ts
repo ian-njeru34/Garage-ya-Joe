@@ -136,6 +136,40 @@ Deno.serve(async (request: Request) => {
       return json({ ok: true, user: { id: userId, email, fullName, role } });
     }
 
+    if (action === "owner_update_staff" || action === "owner_deactivate_user") {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\\s+/i, "");
+      if (!token) return json({ error: "Sign in as the owner first." }, 401);
+      const { data: authData, error: authError } = await admin.auth.getUser(token);
+      if (authError || !authData.user) return json({ error: "Your session is invalid." }, 401);
+      const owner = authData.user;
+      const { data: ownerRole } = await admin.from("user_roles").select("business_id")
+        .eq("user_id", owner.id).eq("role_code", "owner").limit(1).maybeSingle();
+      if (!ownerRole) return json({ error: "Owner permission required." }, 403);
+      const userId = clean(body.userId, 80);
+      if (!userId || userId === owner.id) return json({ error: "You cannot change your own owner account here." }, 400);
+      const { data: target } = await admin.from("user_roles").select("id,user_id,role_code,location_id")
+        .eq("business_id", ownerRole.business_id).eq("user_id", userId).neq("role_code", "owner").limit(1).maybeSingle();
+      if (!target) return json({ error: "Staff account not found in this business." }, 404);
+      if (action === "owner_deactivate_user") {
+        const { error: profileError } = await admin.from("profiles").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", userId);
+        if (profileError) throw profileError;
+        const { error: banError } = await admin.auth.admin.updateUserById(userId, { ban_duration: "876000h" });
+        if (banError) throw banError;
+        return json({ ok: true, message: "Account sign-in disabled. Historical records retained." });
+      }
+      const nextRole = clean(body.role, 40);
+      const locationId = clean(body.locationId, 80);
+      if (!staffRoles.includes(nextRole)) return json({ error: "Choose a valid staff role." }, 400);
+      if (!locationId) return json({ error: "Select an active branch for this staff member." }, 400);
+      const { data: location, error: locationError } = await admin.from("locations").select("id")
+        .eq("id", locationId).eq("business_id", ownerRole.business_id).eq("is_active", true).maybeSingle();
+      if (locationError || !location) return json({ error: "The selected branch is not active in this business." }, 400);
+      const { error: updateError } = await admin.from("user_roles").update({ role_code: nextRole, location_id: locationId })
+        .eq("id", target.id).eq("business_id", ownerRole.business_id);
+      if (updateError) throw updateError;
+      return json({ ok: true, message: "Staff role and branch updated." });
+    }
+
     if (action === "dealer_list" || action === "dealer_respond") {
       const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!token) return json({ error: "Sign in as a dealer first." }, 401);
