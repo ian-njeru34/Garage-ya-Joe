@@ -22,12 +22,12 @@ export default function PaymentVerificationPage(){
  const[source,SRC]=useState("mpesa");const[flow,FL]=useState("incoming");const[account,AC]=useState("");const[file,FILE]=useState<File|null>(null);const[delimiter,DEL]=useState(",");const[headers,HDR]=useState<string[]>([]);const[rows,ROWS]=useState<any[]>([]);const[mapping,MAP]=useState({reference:"",date:"",amount:"",description:"",counterparty:""});const[busy,B]=useState(false);const[loading,L]=useState(true);const[error,E]=useState("");const[notice,N]=useState("");
  const load=useCallback(async()=>{const s=db();const{data:{user}}=await s.auth.getUser();if(!user){router.replace("/customer");return;}const{data:roles,error:rErr}=await s.from("user_roles").select("business_id,role_code").eq("user_id",user.id);if(rErr)throw rErr;const staff=roles?.find(x=>["owner","accountant","administrator"].includes(x.role_code));if(!staff?.business_id){router.replace("/customer");return;}OWNER(staff.role_code==="owner");BI(staff.business_id);
  const q=await Promise.all([
- s.from("locations").select("id,name").eq("business_id",owner.business_id).eq("is_active",true),
- s.from("cash_accounts").select("id,location_id,account_name,account_type,currency_code,provider_name,is_active").eq("business_id",owner.business_id).eq("is_active",true),
- s.from("payment_statement_imports").select("id,source,flow,file_name,row_count,verified_count,unmatched_count,review_count,status,created_at").eq("business_id",owner.business_id).order("created_at",{ascending:false}).limit(50),
- s.from("payment_statement_lines").select("id,import_id,row_number,transaction_reference,transaction_date,amount,currency_code,status,review_reason,matched_payment_table,matched_payment_id,location_id,cash_account_id").eq("business_id",owner.business_id).order("created_at",{ascending:false}).limit(500),
- s.from("customer_payments").select("id,payment_number,payment_date,amount,external_reference,cash_account_id,location_id,status,verification_status").eq("business_id",owner.business_id).limit(1000),
- s.from("supplier_payments").select("id,payment_number,payment_date,amount,external_reference,cash_account_id,location_id,status,verification_status").eq("business_id",owner.business_id).limit(1000)
+ s.from("locations").select("id,name").eq("business_id",staff.business_id).eq("is_active",true),
+ s.from("cash_accounts").select("id,location_id,account_name,account_type,currency_code,provider_name,is_active").eq("business_id",staff.business_id).eq("is_active",true),
+ s.from("payment_statement_imports").select("id,source,flow,file_name,row_count,verified_count,unmatched_count,review_count,status,created_at").eq("business_id",staff.business_id).order("created_at",{ascending:false}).limit(50),
+ s.from("payment_statement_lines").select("id,import_id,row_number,transaction_reference,transaction_date,amount,currency_code,status,review_reason,matched_payment_table,matched_payment_id,location_id,cash_account_id").eq("business_id",staff.business_id).order("created_at",{ascending:false}).limit(500),
+ s.from("customer_payments").select("id,payment_number,payment_date,amount,external_reference,cash_account_id,location_id,status,verification_status").eq("business_id",staff.business_id).limit(1000),
+ s.from("supplier_payments").select("id,payment_number,payment_date,amount,external_reference,cash_account_id,location_id,status,verification_status").eq("business_id",staff.business_id).limit(1000)
  ]);
  const fail=q.find(x=>x.error);if(fail?.error)throw fail.error;LOC(q[0].data||[]);ACC(q[1].data||[]);IMP(q[2].data||[]);LIN(q[3].data||[]);CP(q[4].data||[]);SP(q[5].data||[]);
  if(!account&&q[1].data?.length)AC(q[1].data[0].id);
