@@ -36,6 +36,8 @@ declare
  v_journals integer:=0;
  v_debits numeric(18,2):=0;
  v_credits numeric(18,2):=0;
+ v_balance_variances integer:=0;
+ v_missing_balances integer:=0;
 begin
  if v_uid is null then raise exception 'Authentication required' using errcode='42501';end if;
  if not exists(select 1 from public.user_roles where user_id=v_uid and business_id=p_business_id and role_code='owner') then
@@ -69,6 +71,17 @@ begin
  select count(*)::integer,count(*) filter(where status='verified')::integer,count(*) filter(where status='classified')::integer
  into v_lines,v_verified,v_classified
  from public.payment_statement_lines where business_id=p_business_id and transaction_date between v_period.starts_on and v_period.ends_on;
+ select count(*)::integer into v_missing_balances
+ from (select distinct l.cash_account_id from public.payment_statement_lines l where l.business_id=p_business_id and l.transaction_date between v_period.starts_on and v_period.ends_on and l.status in('verified','classified')) used_accounts
+ left join public.cash_account_period_balances b on b.business_id=p_business_id and b.cash_account_id=used_accounts.cash_account_id and b.accounting_period_id=p_period_id
+ where b.id is null or b.statement_closing_balance_kes is null;
+ if v_missing_balances>0 then raise exception 'Cannot close period: % cash or bank accounts with statement activity are missing confirmed statement closing balances',v_missing_balances; end if;
+ select count(*)::integer into v_balance_variances from public.cash_account_period_balances b
+ join public.cash_accounts ca on ca.id=b.cash_account_id and ca.business_id=p_business_id
+ left join (select e.accounting_period_id,jl.account_id,sum(jl.debit_kes-jl.credit_kes) movement_kes from public.journal_entries e join public.journal_lines jl on jl.journal_entry_id=e.id where e.business_id=p_business_id and e.status='posted' and e.accounting_period_id=p_period_id group by e.accounting_period_id,jl.account_id) movement
+ on movement.accounting_period_id=b.accounting_period_id and movement.account_id=ca.ledger_account_id
+ where b.business_id=p_business_id and b.accounting_period_id=p_period_id and b.statement_closing_balance_kes is not null and abs(b.opening_balance_kes+coalesce(movement.movement_kes,0)-b.statement_closing_balance_kes)>0.01;
+ if v_balance_variances>0 then raise exception 'Cannot close period: % cash or bank account balances do not agree with posted ledger activity',v_balance_variances; end if;
  insert into public.accounting_period_reconciliations(business_id,accounting_period_id,period_name,starts_on,ends_on,statement_line_count,verified_line_count,classified_line_count,posted_journal_count,total_debits_kes,total_credits_kes,closed_by,close_note)
  values(p_business_id,p_period_id,v_period.period_name,v_period.starts_on,v_period.ends_on,v_lines,v_verified,v_classified,v_journals,v_debits,v_credits,v_uid,nullif(btrim(coalesce(p_note,'')),''));
  update public.accounting_periods set status='closed',closed_at=now(),closed_by=v_uid where id=p_period_id and business_id=p_business_id;
