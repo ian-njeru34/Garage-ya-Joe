@@ -65,16 +65,20 @@ Deno.serve(async (request: Request) => {
         return json({ error: "Select a supported staff role." }, 400);
       }
 
-      const { data: locations } = await admin
-        .from("locations")
-        .select("id")
-        .eq("business_id", ownerRole.business_id)
-        .eq("is_active", true)
-        .order("created_at")
-        .limit(1);
-      const locationId = locations?.[0]?.id ?? null;
-      if (role !== "dealer" && !locationId) {
-        return json({ error: "The garage needs an active location before staff accounts can be created." }, 400);
+      const requestedLocationId = clean(body.locationId, 80);
+      let locationId: string | null = null;
+      if (role !== "dealer") {
+        let locationQuery = admin
+          .from("locations")
+          .select("id")
+          .eq("business_id", ownerRole.business_id)
+          .eq("is_active", true);
+        if (requestedLocationId) locationQuery = locationQuery.eq("id", requestedLocationId);
+        const { data: location, error: locationError } = await locationQuery.limit(1).maybeSingle();
+        if (locationError || !location?.id) {
+          return json({ error: requestedLocationId ? "Select an active location belonging to this business." : "The garage needs an active location before staff accounts can be created." }, 400);
+        }
+        locationId = location.id;
       }
 
       const { data: created, error: createError } = await admin.auth.admin.createUser({
