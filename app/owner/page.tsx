@@ -21,7 +21,8 @@ const sections = [
   { label: "Inventory", href: "/owner/inventory", icon: Warehouse, description: "Stock levels, receipts and transfers" },
   { label: "Importation", href: "/owner/importation", icon: Ship, description: "Special orders and imported parts" },
   { label: "Quotations", href: "/owner/quotations", icon: FileText, description: "Prepare and manage customer quotations" },
-  { label: "Sales", href: "/owner/sales", icon: ShoppingCart, description: "Orders, invoices and payments" },
+  { label: "Sales", href: "/owner/sales", icon: ShoppingCart, description: "Orders and sales fulfilment" },
+  { label: "Invoices & payments", href: "/owner/invoices", icon: Wallet, description: "Issue PDF receipts, share invoices on WhatsApp and record customer payments" },
   { label: "Finance", href: "/owner/finance", icon: Wallet, description: "Cash flow and financial records" },
   { label: "Staff", href: "/owner/staff", icon: UserCog, description: "Team members, roles and access" },
   { label: "Branches & locations", href: "/owner/locations", icon: Warehouse, description: "Manage branches, garages and business locations" },
@@ -36,7 +37,7 @@ const metricDefinitions = [
   { key: "imports", label: "Import requests", table: "import_requests", href: "/owner/importation", icon: Ship },
   { key: "shipments", label: "Shipments", table: "shipments", href: "/owner/importation/shipments", icon: TruckIcon },
   { key: "quotations", label: "Quotations", table: "quotations", href: "/owner/quotations", icon: FileText },
-  { key: "invoices", label: "Invoices", table: "invoices", href: "/owner/sales", icon: Wallet },
+  { key: "invoices", label: "Invoices", table: "invoices", href: "/owner/invoices", icon: Wallet },
 ];
 
 function TruckIcon({size=18}:{size?:number}) { return <Ship size={size}/>; }
