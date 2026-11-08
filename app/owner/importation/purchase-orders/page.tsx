@@ -1,4 +1,5 @@
 "use client";
+import {BusinessName} from "../../components/business-branding";
 import {useCallback,useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import {useRouter} from "next/navigation";
@@ -16,7 +17,7 @@ export default function PurchaseOrdersPage(){
  async function submit(r:PO){if(!confirm("Submit "+r.po_number+" to the supplier?"))return;H(true);try{const{error}=await db().from("purchase_orders").update({status:"submitted",updated_at:new Date().toISOString()}).eq("id",r.id).eq("business_id",bid).eq("status","draft");if(error)throw error;T(r.po_number+" submitted.");await load()}catch(e){E(e instanceof Error?e.message:"Could not submit order")}finally{H(false)}}
  const shown=rows.filter(r=>r.po_number.toLowerCase().includes(search.toLowerCase())||r.status.includes(search.toLowerCase()));
  if(loading)return <main className="state">Loading purchase orders…</main>;
- return <main className="shell"><header><a href="/owner/importation"><ArrowLeft size={16}/> Importation</a><span>THE GARAGE · PROCUREMENT</span></header><section><div className="heading"><div><small>PROCUREMENT WORKSPACE</small><h1>Purchase orders</h1><p>Create supplier orders and track purchasing commitments.</p></div><button className="refresh" onClick={()=>void load()}><RefreshCw size={14}/> Refresh</button></div>
+ return <main className="shell"><header><a href="/owner/importation"><ArrowLeft size={16}/> Importation</a><span><BusinessName uppercase/> · PROCUREMENT</span></header><section><div className="heading"><div><small>PROCUREMENT WORKSPACE</small><h1>Purchase orders</h1><p>Create supplier orders and track purchasing commitments.</p></div><button className="refresh" onClick={()=>void load()}><RefreshCw size={14}/> Refresh</button></div>
  {error&&<div className="alert error"><AlertTriangle size={15}/>{error}</div>}{success&&<div className="alert success"><CheckCircle2 size={15}/>{success}</div>}
  <div className="toolbar"><label><Search size={15}/><input value={search} onChange={e=>F(e.target.value)} placeholder="Search PO number or status"/></label><button onClick={()=>O(true)}><Plus size={15}/> New purchase order</button></div>
  <div className="panel"><h2>Purchase register</h2><div className="table"><table><thead><tr><th>PO number</th><th>Date</th><th>Type</th><th>Total</th><th>KES equivalent</th><th>Status</th><th></th></tr></thead><tbody>{shown.map(r=><tr key={r.id}><td>{r.po_number}</td><td>{r.order_date}</td><td>{r.order_type}</td><td>{r.currency_code} {Number(r.order_total).toLocaleString()}</td><td>KES {Number(r.order_total_kes).toLocaleString()}</td><td>{r.status}</td><td>{r.status==="draft"&&<button className="submit" disabled={busy} onClick={()=>void submit(r)}><Send size={12}/> Submit</button>}</td></tr>)}</tbody></table>{!shown.length&&<p className="empty">No purchase orders yet.</p>}</div></div>
