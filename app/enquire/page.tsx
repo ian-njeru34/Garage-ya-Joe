@@ -4,6 +4,7 @@ import SiteFooter from "../components/site-footer";
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import {BusinessName} from "../components/business-branding";
 import { createClient } from "@supabase/supabase-js";
 import { ArrowLeft, ArrowRight, Check, Copy, Wrench } from "lucide-react";
 
@@ -30,10 +31,10 @@ export default function EnquirePage() {
       const {data:result,error:invokeError}=await sb().functions.invoke("garage-portal",{body:{action:"public_request",kind:"enquiry",fullName:name,whatsapp:phone,email,vehicleDetails:vehicle,enquiryType:request,details,website}});
       if(invokeError)throw invokeError;
       if(result?.error)throw new Error(result.error);
-      setSuccess("Your enquiry has been received by The Garage.");
+      setSuccess("Your enquiry has been received by the business.");
     }catch(error){setError(error instanceof Error?error.message:"Your enquiry could not be saved. Please try again.");setBusy(false);return;}
     const message=[
-      "THE GARAGE — SERVICE ENQUIRY",
+      "SERVICE ENQUIRY",
       `Name: ${name}`,
       `Phone: ${phone}`,
       email ? `Email: ${email}` : "",
@@ -51,8 +52,8 @@ export default function EnquirePage() {
   }
 
   return <main className="page">
-    <header className="top"><Link href="/" className="back"><ArrowLeft size={16}/> The Garage</Link><span>ENQUIRIES · KENYA</span></header>
-    <section className="enquire-intro"><div className="eyebrow"><Wrench size={14}/> LET'S GET YOU MOVING</div><h1>Tell us what<br/><em>your vehicle needs.</em></h1><p>Share a few details about your vehicle, service request or spare part. We'll prepare a clear enquiry you can send to the garage.</p></section>
+    <header className="top"><Link href="/" className="back"><ArrowLeft size={16}/> <BusinessName/></Link><span>ENQUIRIES · KENYA</span></header>
+    <section className="enquire-intro"><div className="eyebrow"><Wrench size={14}/> LET'S GET YOU MOVING</div><h1>Tell us what<br/><em>your vehicle needs.</em></h1><p>Share a few details about your vehicle, service request or spare part. We'll prepare a clear enquiry you can send to the business.</p></section>
     <section className="form-wrap">
       <form onSubmit={prepare}>
         <div className="form-title"><span>01 / YOUR DETAILS</span><b>How can we reach you?</b></div>
