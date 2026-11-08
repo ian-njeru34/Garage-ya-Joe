@@ -77,7 +77,7 @@ create or replace function public.owner_create_supplier_bill(
  p_supplier_invoice_number text,p_bill_date date,p_due_date date,p_currency_code char(3),
  p_exchange_rate_to_kes numeric,p_total_amount numeric,p_total_kes numeric,p_notes text,p_lines jsonb
 ) returns uuid language plpgsql security definer set search_path='' as $$
-declare v_uid uuid:=auth.uid(); v_id uuid:=gen_random_uuid(); v_line jsonb; v_no integer:=0; v_sum numeric(18,2):=0;
+declare v_uid uuid:=auth.uid(); v_id uuid:=gen_random_uuid(); v_line jsonb; v_no integer:=0; v_sum numeric(18,2):=0; v_original_sum numeric(18,2):=0;
  v_supplier public.suppliers%rowtype; v_loc public.locations%rowtype;
 begin
  if v_uid is null then raise exception 'Authentication required' using errcode='42501'; end if;
@@ -99,8 +99,10 @@ begin
   insert into public.supplier_bill_lines(business_id,supplier_bill_id,line_number,account_id,description,amount,amount_kes)
   values(p_business_id,v_id,v_no,(v_line->>'account_id')::uuid,coalesce(nullif(btrim(v_line->>'description'),''),'Supplier bill line'),(v_line->>'amount')::numeric,(v_line->>'amount_kes')::numeric);
   v_sum:=v_sum+(v_line->>'amount_kes')::numeric;
+  v_original_sum:=v_original_sum+(v_line->>'amount')::numeric;
  end loop;
  if abs(v_sum-p_total_kes)>0.01 then raise exception 'Bill line KES total (%) does not equal bill total (%)',v_sum,p_total_kes; end if;
+ if abs(v_original_sum-p_total_amount)>0.01 then raise exception 'Bill line currency total (%) does not equal invoice total (%)',v_original_sum,p_total_amount; end if;
  return v_id;
 end; $$;
 revoke all on function public.owner_create_supplier_bill(uuid,uuid,uuid,uuid,text,date,date,char,numeric,numeric,numeric,text,jsonb) from public,anon;
