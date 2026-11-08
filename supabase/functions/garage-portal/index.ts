@@ -76,7 +76,7 @@ Deno.serve(async (request: Request) => {
         if (requestedLocationId) locationQuery = locationQuery.eq("id", requestedLocationId);
         const { data: location, error: locationError } = await locationQuery.limit(1).maybeSingle();
         if (locationError || !location?.id) {
-          return json({ error: requestedLocationId ? "Select an active location belonging to this business." : "The garage needs an active location before staff accounts can be created." }, 400);
+          return json({ error: requestedLocationId ? "Select an active location belonging to this business." : "This business needs an active location before staff accounts can be created." }, 400);
         }
         locationId = location.id;
       }
@@ -221,7 +221,7 @@ Deno.serve(async (request: Request) => {
         .update({ status: "dealer_responded", updated_at: new Date().toISOString() })
         .eq("id", requestId).eq("business_id", dealer.business_id);
       if (updateError) throw updateError;
-      return json({ ok: true, message: "Your quote has been sent to The Garage owner." });
+      return json({ ok: true, message: "Your quote has been sent to the business owner." });
     }
 
     if (action === "owner_publish_spare_quote") {
@@ -311,7 +311,7 @@ Deno.serve(async (request: Request) => {
           details: clean(body.details, 3000) || null,
         });
         if (error) throw error;
-        return json({ ok: true, message: "Your enquiry has been received by The Garage." });
+        return json({ ok: true, message: "Your enquiry has been received by the business." });
       }
 
       if (kind === "spare") {
