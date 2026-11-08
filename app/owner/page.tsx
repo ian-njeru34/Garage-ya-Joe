@@ -38,6 +38,7 @@ const metricDefinitions = [
   { key: "shipments", label: "Shipments", table: "shipments", href: "/owner/importation/shipments", icon: TruckIcon },
   { key: "quotations", label: "Quotations", table: "quotations", href: "/owner/quotations", icon: FileText },
   { key: "invoices", label: "Invoices", table: "invoices", href: "/owner/invoices", icon: Wallet },
+  { key: "payments", label: "Customer payments", table: "customer_payments", href: "/owner/invoices", icon: Wallet },
 ];
 
 function TruckIcon({size=18}:{size?:number}) { return <Ship size={size}/>; }
