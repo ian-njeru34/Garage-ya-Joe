@@ -120,7 +120,7 @@ export default function ResetPasswordPage() {
         <a className="reset-brand" href="/"><BusinessName uppercase/></a>
         <span className="reset-eyebrow">ACCOUNT SECURITY</span>
         <h1>Set a new password</h1>
-        <p className="reset-intro">Choose a new password for your The Garage account.</p>
+        <p className="reset-intro">Choose a new password for your business account.</p>
 
         {checking ? <p className="reset-note">Checking your secure reset link…</p> : null}
         {!checking && error && !ready ? <div className="reset-alert" role="alert">{error}</div> : null}
