@@ -1,5 +1,5 @@
 "use client";
-import {BusinessName} from "../components/business-branding";
+import {BusinessName} from "../../components/business-branding";
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
