@@ -1,4 +1,5 @@
 "use client";
+import {BusinessName} from "../components/business-branding";
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -39,10 +40,10 @@ export default function ForgotPasswordPage() {
   return (
     <main className="forgot-shell">
       <section className="forgot-card">
-        <a className="brand" href="/">THE GARAGE</a>
+        <a className="brand" href="/"><BusinessName uppercase/></a>
         <span className="eyebrow">ACCOUNT SECURITY</span>
         <h1>Forgot your password?</h1>
-        <p className="intro">Enter the email address associated with your The Garage account. We’ll send a secure link to choose a new password.</p>
+        <p className="intro">Enter the email address associated with your business account. We’ll send a secure link to choose a new password.</p>
         {sent ? (
           <div className="success" role="status">
             If an account exists for <strong>{email.trim()}</strong>, a password-reset email has been requested. Check your inbox and spam folder, then open the newest email on this device.
